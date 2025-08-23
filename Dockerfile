@@ -1,36 +1,23 @@
-# Stage 1: Build the Nuxt App
-FROM node:23-alpine as build-stage
-
-# Set working directory
+# syntax=docker/dockerfile:1
+FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application files
+FROM node:20-alpine AS build
+WORKDIR /app
+ENV NUXT_TELEMETRY_DISABLED=1
+ENV NUXT_SSR=false
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npm run build
 
-# Build the Nuxt app
-RUN npm run generate
-
-# Stage 2: Run the Nuxt App in Preview Mode
-FROM node:23-alpine as preview-stage
-
-# Set working directory
+FROM node:20-alpine AS runner
 WORKDIR /app
-
-# Copy the built Nuxt app from the build stage
-COPY --from=build-stage /app/.output /app/.output
-
-# Install only production dependencies (if needed)
-COPY package*.json ./
-RUN npm install --production
-
-# Expose the port that Nuxt serves on (default is 3000)
+ENV NODE_ENV=production
+ENV NUXT_SSR=false
+ENV HOST=0.0.0.0
+ENV PORT=3000
+COPY --from=build /app/.output ./.output
 EXPOSE 3000
-
-# Start Nuxt in Preview Mode
-CMD ["npm","run","preview"]
+CMD ["node", ".output/server/index.mjs"]
