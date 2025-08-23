@@ -12,7 +12,7 @@ export const useRecordApi = () => {
 
   // --- Configuration ---
   const config = useRuntimeConfig();
-  const API_URL = config.public.apiUrl || 'http://localhost:8080';
+  const API_URL = config.public.BASE_API_URL || 'http://localhost:8080';
 
   // --- Function to fetch multiple records (paginated) ---
   const fetchRecords = async (machineId, options = {}) => {

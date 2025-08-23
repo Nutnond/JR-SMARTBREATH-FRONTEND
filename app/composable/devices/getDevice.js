@@ -10,7 +10,7 @@ export const useDeviceApi = () => {
   const devices = ref([]); //  மாநிலสำหรับเก็บข้อมูลเครื่องที่ดึงมาได้
   // --- Configuration ---
   const config = useRuntimeConfig();
-  const API_URL = config.public.apiUrl || 'http://localhost:8080';
+  const API_URL = config.public.BASE_API_URL || 'http://localhost:8080';
 
   /**
    * 🔄 ฟังก์ชันสำหรับดึงข้อมูลเครื่องทั้งหมดของผู้ใช้

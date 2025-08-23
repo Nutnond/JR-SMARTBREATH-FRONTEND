@@ -15,7 +15,7 @@ export const useAuth = () => {
   const error = ref(null);
   const userStore = useUserStore();
   const config = useRuntimeConfig();
-  const API_URL = config.public.apiUrl || 'http://localhost:8080';
+  const API_URL = config.public.BASE_API_URL || 'http://localhost:8080';
 
   const login = async (credentials) => {
     loading.value = true;

@@ -8,6 +8,12 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
+
+  runtimeConfig: {
+    public: {
+      BASE_API_URL: process.env.BASE_API_URL || 'https://localhost:7090'
+    } 
+  },
   css: [ '~/assets/css/main.css'],
   modules: [
     '@nuxt/image',

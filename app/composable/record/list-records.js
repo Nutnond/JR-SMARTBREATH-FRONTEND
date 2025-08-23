@@ -11,7 +11,7 @@ export const useRecordApi = () => {
 
     // --- Configuration ---
     const config = useRuntimeConfig();
-    const API_URL = config.public.apiUrl || 'http://localhost:8080';
+    const API_URL = config.public.BASE_API_URL|| 'http://localhost:8080';
 
     /**
      * ฟังก์ชันสำหรับดึงข้อมูล Health Records ของเครื่องที่ระบุ
