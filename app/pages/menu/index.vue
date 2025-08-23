@@ -64,7 +64,7 @@ const menuItems = ref([
     description: 'ดูผลการตรวจวัดสุขภาพล่าสุด',
     icon: 'stash:search-results',
     color: 'from-sky-500 to-blue-600',
-    route: '/health-check'
+    route: '/selectdevices'
   },
   {
     title: 'จัดการอุปกรณ์',
@@ -91,14 +91,8 @@ const menuItems = ref([
 
 // Methods
 
-const handleMenuClick = async (item, index) => {
-  if (isMobileMenuOpen.value) {
-    isMobileMenuOpen.value = false
-    await new Promise(resolve => setTimeout(resolve, 300)); // wait for menu to close
-  }
-  console.log(`Navigating to: ${item.title}`)
-  alert(`เปิดหน้า: ${item.title}`)
-  // await navigateTo(item.route)
+const handleMenuClick =(item) => {
+  navigateTo(item.route)
 }
 
 // Close mobile menu when clicking outside (logic improved for reliability)

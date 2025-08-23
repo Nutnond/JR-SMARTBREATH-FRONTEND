@@ -232,6 +232,7 @@ const handleKeyPress = (event) => {
 
 definePageMeta({
   layout: 'empty-layout',
+  middleware:'auth'
 })
 
 // Lifecycle (เหมือนเดิม)
@@ -242,6 +243,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('keypress', handleKeyPress)
 })
+
 </script>
 
 <style scoped>
