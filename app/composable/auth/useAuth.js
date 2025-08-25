@@ -6,8 +6,20 @@ import { ref } from 'vue';
 /**
  * @typedef {object} LoginCredentials
  * @property {string} [username]
- * @property {string} [email]
  * @property {string} [password]
+ */
+
+/**
+ * @typedef {object} UserRegistrationData
+ * @property {string} username
+ * @property {string} firstName      // ✅ UPDATED
+ * @property {string} lastName       // ✅ UPDATED
+ * @property {string} email
+ * @property {string} password
+ * @property {number} weight
+ * @property {number} height
+ * @property {string} gender
+ * @property {number} age
  */
 
 export const useAuth = () => {
@@ -28,40 +40,66 @@ export const useAuth = () => {
       });
 
       if (response.token && response.user) {
-        // ✅ ปรับปรุง: ตรวจสอบให้แน่ใจว่าทำงานเฉพาะฝั่ง Client
         if (import.meta.client) {
           sessionStorage.setItem('accessToken', response.token);
         }
         console.log('Login successful, user:', response.user);
-        
-        // setUser สามารถทำงานได้ทั้งสองฝั่ง เพราะ Pinia จัดการให้
+
         userStore.setUser(response.user);
-        
-        return true; 
+
+        return true;
       }
-      
-      return false; 
+
+      return false;
     } catch (err) {
       error.value = err.data?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
       console.error('Login failed:', err);
-      return false; 
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  /**
+   * Registers a new user with the provided details.
+   * @param {UserRegistrationData} userData The user's registration data.
+   * @returns {Promise<boolean>} True if registration was successful, otherwise false.
+   */
+  const register = async (userData) => {
+    loading.value = true;
+    error.value = null;    
+    try {
+      const response = await $fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        body: userData,
+      });
+
+      if (response && response.id) {
+        console.log('Registration successful:', response);
+        return true;
+      }
+      return false;
+
+    } catch (err) {
+      error.value = err.data?.message || 'เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก';
+      console.error('Registration failed:', err);
+      return false;
     } finally {
       loading.value = false;
     }
   };
 
   const logout = () => {
-    // ✅ ปรับปรุง: การ Logout เป็นกระบวนการที่ควรทำบน Client เท่านั้น
     if (process.client) {
       sessionStorage.removeItem('accessToken');
       userStore.clearUser();
-      // การใช้ return navigateTo() เป็น Pattern ที่ดี
       return navigateTo('/login');
     }
   };
 
   return {
     login,
+    register,
     logout,
     loading,
     error,

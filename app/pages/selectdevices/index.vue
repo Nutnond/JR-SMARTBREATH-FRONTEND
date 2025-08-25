@@ -63,7 +63,7 @@
                     {{ device.deviceName }}
                   </h3>
                   <p class="text-blue-100 text-sm">
-                    เจ้าของ: {{ device.owner.username }}
+                    อุปกรณ์ : {{ device.model }}
                   </p>
                 </div>
               </div>
@@ -191,7 +191,14 @@ const formatDateTime = (dateString) => {
 }
 
 
-onMounted(() => {
-  fetchDevices()
+onMounted(async() => {
+  await fetchDevices()
+  console.log(devices.value);
+  
+})
+
+definePageMeta({
+  title:"JR-SMARTBREATH",
+  middleware:'auth'
 })
 </script>
