@@ -51,7 +51,7 @@
           :style="{ 'transition-delay': `${index * 100}ms` }"
         >
           <div class="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 border border-slate-200/50 hover:border-blue-300 hover:scale-105 overflow-hidden">
-            
+             
             <!-- Card Header -->
             <div class="bg-gradient-to-r from-blue-500 to-sky-500 p-4">
               <div class="flex items-center space-x-3 text-white">
@@ -124,6 +124,7 @@
             </button>
             <button
               v-else
+              @click="navigateTo('/devices')"
               class="bg-gradient-to-r from-slate-100 to-blue-100 hover:from-slate-200 hover:to-blue-200 text-slate-700 hover:text-blue-700 px-8 py-3 rounded-xl font-medium transition-all duration-200 border border-slate-200 hover:border-blue-300 flex items-center space-x-2 mx-auto"
             >
               <Icon name="lucide:plus" class="w-4 h-4" />

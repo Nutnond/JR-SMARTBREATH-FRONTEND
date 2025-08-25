@@ -121,32 +121,21 @@
         </div>
       </div>
     </div>
-
-    <Transition 
-      enter-active-class="transition ease-out duration-300" 
-      enter-from-class="opacity-0 translate-y-2" 
-      enter-to-class="opacity-100 translate-y-0" 
-      leave-active-class="transition ease-in duration-200" 
-      leave-from-class="opacity-100 translate-y-0" 
-      leave-to-class="opacity-0 translate-y-2">
-      <div v-if="showToast" class="fixed top-4 right-4 z-50 bg-white border-l-4 border-blue-500 rounded-lg shadow-lg p-4 max-w-sm">
-        <div class="flex items-center">
-          <Icon name="lucide:info" class="w-5 h-5 text-blue-500 mr-3" />
-          <p class="text-sm font-medium text-gray-900">{{ toastMessage }}</p>
-        </div>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
-import { useAuth } from '~/composable/auth/useAuth'; // Corrected path
+import { useAuth } from '~/composables/auth/useAuth'; // ตรวจสอบ path ให้ถูกต้อง
+import { useNuxtApp } from '#app';
+
 useHead({
   title: 'สมัครสมาชิก | JR SMARTBREATH',
   meta: [{ name: 'description', content: 'สมัครสมาชิก JR SMARTBREATH เพื่อดูแลสุขภาพการหายใจของคุณ' }]
 });
 
+// ✅ 1. เรียกใช้ $swal และ useAuth
+const { $swal } = useNuxtApp();
 const { register, loading, error } = useAuth();
 
 const formData = ref({
@@ -155,7 +144,7 @@ const formData = ref({
   lastName: '',
   email: '',
   password: '',
-  confirmPassword: '', // ✅ ADDED
+  confirmPassword: '',
   weight: '',
   height: '',
   gender: '',
@@ -163,68 +152,70 @@ const formData = ref({
 });
 
 const showPassword = ref(false);
-const showConfirmPassword = ref(false); // ✅ ADDED
-const showToast = ref(false);
-const toastMessage = ref('');
+const showConfirmPassword = ref(false);
 
+// ✅ 2. ปรับปรุง watcher ให้แสดง SweetAlert Toast สำหรับ Error
 watch(error, (newError) => {
   if (newError) {
-    showToastMessage(newError);
+    $swal({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: newError,
+        showConfirmButton: false,
+        timer: 3000
+    });
   }
 });
 
+// ✅ 3. ปรับปรุง handleRegister ทั้งหมดให้ใช้ SweetAlert
 const handleRegister = async () => {
-  // 1. Check for empty fields
   const requiredFields = ['username', 'firstName', 'lastName', 'email', 'password', 'confirmPassword', 'weight', 'height', 'gender', 'age'];
+  
+  // --- Validation ---
   if (requiredFields.some(field => !formData.value[field])) {
-    showToastMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
+    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบถ้วน', showConfirmButton: false, timer: 3000 });
     return;
   }
   
-  // 2. ✅ ADDED: Validate Password Confirmation
   if (formData.value.password !== formData.value.confirmPassword) {
-    showToastMessage('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
+    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน', showConfirmButton: false, timer: 3000 });
     return;
   }
 
-  // 3. ✅ ADDED: Validate Weight and Height ranges
   const weight = Number(formData.value.weight);
   const height = Number(formData.value.height);
 
   if (weight < 10 || weight > 500) {
-    showToastMessage('ค่าน้ำหนักไม่ถูกต้อง (ต้องอยู่ระหว่าง 10 - 500 กก.)');
+    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'ค่าน้ำหนักไม่ถูกต้อง (ต้องอยู่ระหว่าง 10 - 500 กก.)', showConfirmButton: false, timer: 3000 });
     return;
   }
 
   if (height < 50 || height > 300) {
-    showToastMessage('ค่าส่วนสูงไม่ถูกต้อง (ต้องอยู่ระหว่าง 50 - 300 ซม.)');
+    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'ค่าส่วนสูงไม่ถูกต้อง (ต้องอยู่ระหว่าง 50 - 300 ซม.)', showConfirmButton: false, timer: 3000 });
     return;
   }
   
-  // 4. Prepare payload (remove confirmPassword)
-  const payload = {
-    ...formData.value,
-    weight: weight,
-    height: height,
-    age: Number(formData.value.age)
-  };
+  // --- Prepare Payload ---
+  const payload = { ...formData.value, weight, height, age: Number(formData.value.age) };
   delete payload.confirmPassword;
 
-  // 5. Call register function
+  // --- Call Register API ---
   const success = await register(payload);
 
+  // --- Handle Success ---
   if (success) {
-    showToastMessage('สมัครสมาชิกสำเร็จ!');
-    setTimeout(() => navigateTo('/login'), 1500);
+    await $swal({
+        icon: 'success',
+        title: 'สมัครสมาชิกสำเร็จ!',
+        text: 'กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...',
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true
+    });
+    navigateTo('/login');
   }
-};
-
-const showToastMessage = (msg) => {
-  toastMessage.value = msg;
-  showToast.value = true;
-  setTimeout(() => {
-    showToast.value = false;
-  }, 3000);
+  // กรณีไม่สำเร็จ, watcher จะแสดง error toast ให้อัตโนมัติ
 };
 
 definePageMeta({

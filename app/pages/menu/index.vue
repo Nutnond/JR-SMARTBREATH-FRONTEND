@@ -71,7 +71,7 @@ const menuItems = ref([
     description: 'ตั้งค่าและจัดการอุปกรณ์วัดค่า',
     icon: 'material-symbols:device-hub',
     color: 'from-purple-500 to-violet-600',
-    route: '/device-management'
+    route: '/devices'
   },
   {
     title: 'รายงานผล',

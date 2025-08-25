@@ -124,7 +124,7 @@
                 <p class="text-sm text-gray-600 mt-1">อัตราการไหลของอากาศสูงสุด</p>
               </div>
               <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2z"></path></svg>
               </div>
             </div>
           </div>
@@ -160,28 +160,76 @@
           </div>
         </div>
 
+        <!-- ปรับปรุงส่วนการวิเคราะห์อัตราส่วน FEV1/FVC ให้แสดงเฉพาะค่าปัจจุบัน -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h3 class="text-xl font-semibold text-gray-900 mb-6">การวิเคราะห์อัตราส่วน FEV1/FVC</h3>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2">
-              <div class="h-64">
-                <canvas ref="ratioChart"></canvas>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- แสดงผลอัตราส่วน FEV1/FVC ในรูปแบบกราฟวงกลม -->
+            <div class="flex items-center justify-center">
+              <div class="relative w-80 h-80">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <!-- วงกลมพื้นหลัง -->
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" stroke-width="10"></circle>
+                  <!-- วงกลมแสดงค่า -->
+                  <circle cx="50" cy="50" r="40" fill="none" :stroke="getRatioColor(parseFloat(resultData.fev1Fvc))" stroke-width="10" stroke-linecap="round"
+                    :stroke-dasharray="251.33"
+                    :stroke-dashoffset="251.33 - (parseFloat(resultData.fev1Fvc) * 251.33)"
+                    class="transition-all duration-1000 ease-out"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-4xl font-bold text-gray-900">{{ resultData.fev1Fvc }}</div>
+                    <div class="text-lg font-medium text-gray-600 mt-2">FEV1/FVC อัตราส่วน</div>
+                    <div :class="'text-sm font-semibold mt-2 ' + getRatioColorClass(parseFloat(resultData.fev1Fvc))">
+                      {{ getRatioStatus(parseFloat(resultData.fev1Fvc)) }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="space-y-4">
-              <div class="bg-blue-50 rounded-lg p-4">
-                <h4 class="font-semibold text-blue-900 mb-2">อัตราส่วนปัจจุบัน</h4>
-                <p class="text-2xl font-bold text-blue-600">{{ resultData.fev1Fvc }}</p>
-                <p class="text-sm text-blue-700 mt-1">{{ getRatioStatus(parseFloat(resultData.fev1Fvc)) }}</p>
+
+            <!-- ข้อมูลค่าอ้างอิงและการแปลผล -->
+            <div class="space-y-6">
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+                <h4 class="font-bold text-blue-900 mb-4 text-lg">ผลการวิเคราะห์ปัจจุบัน</h4>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-blue-800">FEV1:</span>
+                    <span class="font-semibold text-blue-900">{{ resultData.fev1 }} ลิตร</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-blue-800">FVC:</span>
+                    <span class="font-semibold text-blue-900">{{ resultData.fvc }} ลิตร</span>
+                  </div>
+                  <div class="border-t border-blue-200 pt-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-blue-800 font-medium">อัตราส่วน:</span>
+                      <span class="font-bold text-xl text-blue-900">{{ resultData.fev1Fvc }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <h4 class="font-semibold text-gray-900 mb-2">ค่าอ้างอิง</h4>
-                <ul class="text-sm text-gray-600 space-y-1">
-                  <li>• ปกติ: > 0.75</li>
-                  <li>• เล็กน้อย: 0.60 - 0.75</li>
-                  <li>• ปานกลาง: 0.45 - 0.60</li>
-                  <li>• รุนแรง: < 0.45</li>
-                </ul>
+
+              <div class="bg-gray-50 rounded-lg p-6">
+                <h4 class="font-bold text-gray-900 mb-4 text-lg">ค่าอ้างอิงการแปลผล</h4>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-3 bg-green-100 rounded-lg">
+                    <span class="text-green-800 font-medium">ปกติ</span>
+                    <span class="text-green-900 font-semibold">> 0.75</span>
+                  </div>
+                  <div class="flex items-center justify-between p-3 bg-yellow-100 rounded-lg">
+                    <span class="text-yellow-800 font-medium">การอุดกั้นเล็กน้อย</span>
+                    <span class="text-yellow-900 font-semibold">0.60 - 0.75</span>
+                  </div>
+                  <div class="flex items-center justify-between p-3 bg-orange-100 rounded-lg">
+                    <span class="text-orange-800 font-medium">การอุดกั้นปานกลาง</span>
+                    <span class="text-orange-900 font-semibold">0.45 - 0.60</span>
+                  </div>
+                  <div class="flex items-center justify-between p-3 bg-red-100 rounded-lg">
+                    <span class="text-red-800 font-medium">การอุดกั้นรุนแรง</span>
+                    <span class="text-red-900 font-semibold">< 0.45</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -228,8 +276,6 @@ const goBack = () => {
 }
 
 const lungFunctionChart = ref(null);
-const ratioChart = ref(null);
-
 const circumference = 2 * Math.PI * 45;
 
 const formatDateTime = (dateString) => {
@@ -256,6 +302,21 @@ const getRatioStatus = (ratio) => {
   if (ratio >= 0.60) return 'การอุดกั้นเล็กน้อย';
   if (ratio >= 0.45) return 'การอุดกั้นปานกลาง';
   return 'การอุดกั้นรุนแรง';
+}
+
+// เพิ่มฟังก์ชันสำหรับกำหนดสีตามค่า ratio
+const getRatioColor = (ratio) => {
+  if (ratio > 0.75) return '#10b981'; // เขียว - ปกติ
+  if (ratio >= 0.60) return '#f59e0b'; // เหลือง - เล็กน้อย
+  if (ratio >= 0.45) return '#f97316'; // ส้ม - ปานกลาง
+  return '#ef4444'; // แดง - รุนแรง
+}
+
+const getRatioColorClass = (ratio) => {
+  if (ratio > 0.75) return 'text-green-600';
+  if (ratio >= 0.60) return 'text-yellow-600';
+  if (ratio >= 0.45) return 'text-orange-600';
+  return 'text-red-600';
 }
 
 const getRecommendations = () => {
@@ -293,7 +354,6 @@ const initCharts = async () => {
   Chart.register(...registerables);
 
   if (window.myLungChart) window.myLungChart.destroy();
-  if (window.myRatioChart) window.myRatioChart.destroy();
 
   if (lungFunctionChart.value) {
     window.myLungChart = new Chart(lungFunctionChart.value, {
@@ -334,41 +394,6 @@ const initCharts = async () => {
         },
         scales: {
           y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.1)' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-  }
-
-  if (ratioChart.value) {
-    window.myRatioChart = new Chart(ratioChart.value, {
-      type: 'line',
-      data: {
-        labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.'],
-        datasets: [{
-          label: 'อัตราส่วน FEV1/FVC',
-          data: [0.82, 0.85, 0.83, 0.86, 0.84, 0.87, 0.85, parseFloat(resultData.value.fev1Fvc)],
-          borderColor: 'rgb(59, 130, 246)',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: 'rgb(59, 130, 246)',
-          pointBorderColor: 'rgb(255, 255, 255)',
-          pointBorderWidth: 2,
-          pointRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          y: { beginAtZero: false, min: 0.4, max: 1.0, grid: { color: 'rgba(0, 0, 0, 0.1)' } },
           x: { grid: { display: false } }
         }
       }
