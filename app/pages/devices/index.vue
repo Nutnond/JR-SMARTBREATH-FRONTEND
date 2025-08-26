@@ -24,15 +24,6 @@
           </div>
           
           <div class="mt-6 lg:mt-0 flex flex-col sm:flex-row gap-3">
-            <div class="relative">
-              <Icon name="lucide:search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="ค้นหาอุปกรณ์..."
-                class="pl-10 pr-4 py-3 border border-slate-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 w-full sm:w-64"
-              />
-            </div>
             <button
               @click="showAddDeviceModal = true"
               class="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:shadow-lg hover:scale-105 flex items-center space-x-2"
@@ -43,57 +34,6 @@
           </div>
         </div>
       </header>
-
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200/50 hover:shadow-md transition-all duration-200">
-          <div class="flex items-center space-x-3">
-            <div class="p-3 bg-gradient-to-r from-blue-500 to-sky-500 rounded-xl">
-              <Icon name="lucide:smartphone" class="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p class="text-sm text-slate-600">อุปกรณ์ทั้งหมด</p>
-              <p class="text-2xl font-bold text-slate-800">{{ totalDevices }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200/50 hover:shadow-md transition-all duration-200">
-          <div class="flex items-center space-x-3">
-            <div class="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl">
-              <Icon name="lucide:wifi" class="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p class="text-sm text-slate-600">ออนไลน์</p>
-              <p class="text-2xl font-bold text-slate-800">{{ onlineDevices }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200/50 hover:shadow-md transition-all duration-200">
-          <div class="flex items-center space-x-3">
-            <div class="p-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl">
-              <Icon name="lucide:wifi-off" class="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p class="text-sm text-slate-600">ออฟไลน์</p>
-              <p class="text-2xl font-bold text-slate-800">{{ offlineDevices }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200/50 hover:shadow-md transition-all duration-200">
-          <div class="flex items-center space-x-3">
-            <div class="p-3 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl">
-              <Icon name="lucide:activity" class="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p class="text-sm text-slate-600">ใช้งานวันนี้</p>
-              <p class="text-2xl font-bold text-slate-800">{{ activeToday }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Error State -->
       <div v-if="error" class="text-center py-16">
@@ -174,14 +114,6 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-2 ml-4">
                   <button
-                    @click="viewDevice(device)"
-                    class="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group/btn"
-                    title="ดูรายละเอียด"
-                  >
-                    <Icon name="lucide:eye" class="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                  </button>
-                  
-                  <button
                     @click="editDevice(device)"
                     class="p-2 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200 group/btn"
                     title="แก้ไข"
@@ -190,20 +122,11 @@
                   </button>
                   
                   <button
-                    @click="deleteDevice(device)"
+                    @click="handleResetDevice(device)"
                     class="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 group/btn"
                     title="ลบ"
                   >
                     <Icon name="lucide:trash-2" class="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                  </button>
-                  
-                  <div class="w-px h-6 bg-slate-200 mx-2"></div>
-                  
-                  <button
-                    class="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 hover:scale-105"
-                  >
-                    <Icon name="lucide:settings" class="w-3 h-3" />
-                    <span>ตั้งค่า</span>
                   </button>
                 </div>
               </div>
@@ -259,25 +182,14 @@
           
           <div class="p-6 space-y-4">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">ชื่ือุปกรณ์</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">ชื่ออุปกรณ์</label>
               <input
                 v-model="newDevice.name"
                 type="text"
                 placeholder="ระบุชื่ออุปกรณ์"
                 class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               />
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">รุ่น</label>
-              <input
-                v-model="newDevice.model"
-                type="text"
-                placeholder="ระบุรุ่นอุปกรณ์"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              />
-            </div>
-            
+            </div>            
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">รหัสอุปกรณ์</label>
               <input
@@ -305,6 +217,73 @@
           </div>
         </div>
       </div>
+
+      <!-- Edit Device Modal -->
+      <div v-if="showEditDeviceModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300">
+          <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-semibold text-slate-800">แก้ไขอุปกรณ์</h3>
+              <button
+                @click="closeEditModal"
+                class="p-2 hover:bg-slate-100 rounded-lg transition-colors duration-200"
+              >
+                <Icon name="lucide:x" class="w-5 h-5 text-slate-600" />
+              </button>
+            </div>
+          </div>
+          
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">ชื่ออุปกรณ์</label>
+              <input
+                v-model="editingDevice.deviceName"
+                type="text"
+                placeholder="ระบุชื่ออุปกรณ์"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              />
+            </div>
+            
+            <!-- แสดงข้อมูลอื่น ๆ แต่ไม่สามารถแก้ไขได้ -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">รุ่น</label>
+              <input
+                :value="editingDevice.model || 'ไม่ระบุรุ่น'"
+                type="text"
+                disabled
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">เจ้าของอุปกรณ์</label>
+              <input
+                :value="editingDevice.owner?.username || 'ไม่ระบุเจ้าของ'"
+                type="text"
+                disabled
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
+              />
+            </div>
+          </div>
+          
+          <div class="p-6 border-t border-slate-200 flex space-x-3">
+            <button
+              @click="closeEditModal"
+              class="flex-1 px-4 py-3 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition-all duration-200"
+            >
+              ยกเลิก
+            </button>
+            <button
+              @click="handleEdit"
+              :disabled="isUpdating"
+              class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-medium transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              <div v-if="isUpdating" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>{{ isUpdating ? 'กำลังบันทึก...' : 'บันทึก' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -319,15 +298,27 @@ const {
   loading: isLoading,
   error, 
   devices, 
-  fetchDevices 
+  fetchDevices,
+  updateDevice,
+  resetDevice,
+  registerDevice
 } = useDeviceApi()
-
+const { $swal } = useNuxtApp();
 const searchQuery = ref('')
 const showAddDeviceModal = ref(false)
+const showEditDeviceModal = ref(false)
+const isUpdating = ref(false)
+
 const newDevice = ref({
   name: '',
-  model: '',
   deviceId: ''
+})
+
+const editingDevice = ref({
+  id: '',
+  deviceName: '',
+  model: '',
+  owner: null
 })
 
 const filteredDevices = computed(() => {
@@ -358,40 +349,172 @@ const viewDevice = (device) => {
 }
 
 const editDevice = (device) => {
-  alert(`แก้ไขอุปกรณ์: ${device.deviceName} (จำลอง)`)
+  editingDevice.value = {
+    id: device.id,
+    deviceName: device.deviceName,
+    model: device.model,
+    owner: device.owner
+  }
+  showEditDeviceModal.value = true
 }
 
-const deleteDevice = async (device) => {
-  if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบอุปกรณ์: ${device.deviceName}?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`)) {
+const closeEditModal = () => {
+  showEditDeviceModal.value = false
+  editingDevice.value = {
+    id: '',
+    deviceName: '',
+    model: '',
+    owner: null
+  }
+}
+
+const handleEdit = async () => {
+  if (!editingDevice.value.deviceName.trim()) {
+    alert('กรุณากรอกชื่ออุปกรณ์')
+    return
+  }
+
+  isUpdating.value = true
+  
+  try {
+     // เรียกใช้ฟังก์ชันใหม่จาก composable
+    const success = await updateDevice(editingDevice.value.id, { 
+      deviceName:editingDevice.value.deviceName
+    });
+
+    if (success) {
+      $swal({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'แก้ไขข้อมูลอุปกรณ์สำเร็จ',
+        showConfirmButton: false,
+        timer: 2000
+      });
+      showEditDeviceModal.value = false;
+      await fetchDevices(); // โหลดข้อมูลใหม่
+    } else {
+      // error.value จาก composable จะถูกตั้งค่าอัตโนมัติ
+      throw new Error(error.value || 'Update failed');
+    }
+  } catch (error) {
+     $swal({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: error.message || 'เกิดข้อผิดพลาดในการแก้ไข',
+      showConfirmButton: false,
+      timer: 3000
+    });
+    
+  } finally {
+    isUpdating.value = false
+    await fetchDevices(); // โหลดข้อมูลใหม่
+    closeEditModal()
+  }
+}
+
+const handleResetDevice = async (device) => {
+  const result = await $swal({
+    title: 'ยืนยันการลบ',
+    text: `คุณต้องการลบอุปกรณ์ "${device.deviceName}" ใช่หรือไม่? ข้อมูลการวัดผลทั้งหมดจะถูกลบ`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#F53914', // สีเหลืองอำพัน
+    cancelButtonColor: '#718096',
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก'
+  })
+
+  if (result.isConfirmed) {
     try {
-      // Here you would call the actual delete API
-      alert(`ลบอุปกรณ์ ${device.deviceName} เรียบร้อยแล้ว (จำลอง)`)
-      // Refresh the devices list
+      // ✅ เรียกใช้ฟังก์ชัน resetDevice จาก composable
+      const success = await resetDevice(device.id)
+
+      if (success) {
+        $swal({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'ลบอุปกรณ์สำเร็จ!',
+          showConfirmButton: false,
+          timer: 2000
+        })
+        // Refresh a list เพื่อแสดงผลล่าสุด
+        await fetchDevices()
+      } else {
+        // หากล้มเหลว ให้โยน error ที่ได้จาก composable
+        throw new Error(error.value || 'การลบอุปกรณ์ล้มเหลว')
+      }
+    } catch (err) {
+      $swal({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: err.message || 'เกิดข้อผิดพลาดในการลบอุปกรณ์',
+        showConfirmButton: false,
+        timer: 3000
+      })
       await fetchDevices()
-    } catch (error) {
-      alert('เกิดข้อผิดพลาดในการลบอุปกรณ์')
     }
   }
 }
 
 const addDevice = async () => {
-  if (!newDevice.value.name || !newDevice.value.model || !newDevice.value.deviceId) {
-    alert('กรุณากรอกข้อมูลให้ครบถ้วน')
+  // 1. ตรวจสอบข้อมูลจากฟอร์ม
+  if (!newDevice.value.name) {
+    $swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'warning',
+      title: 'กรุณากรอกชื่อของอุปกรณ์',
+      showConfirmButton: false,
+      timer: 3000
+    })
     return
   }
   
   try {
-    // Here you would call the actual add device API
-    alert(`เพิ่มอุปกรณ์ ${newDevice.value.name} เรียบร้อยแล้ว (จำลอง)`)
-    
-    // Reset form and close modal
-    newDevice.value = { name: '', model: '', deviceId: '' }
-    showAddDeviceModal.value = false
-    
-    // Refresh the devices list
-    await fetchDevices()
-  } catch (error) {
-    alert('เกิดข้อผิดพลาดในการเพิ่มอุปกรณ์')
+    // 2. เตรียมข้อมูล (payload) ที่จะส่งไป API
+    // สังเกตว่ามีการแปลง .name เป็น .deviceName ให้ตรงกับที่ backend ต้องการ
+    const payload = {
+        deviceName: newDevice.value.name,
+    }
+
+    // 3. เรียกใช้ฟังก์ชัน createDevice จาก composable
+    const success = await registerDevice(newDevice.value.deviceId,payload)
+
+    if (success) {
+      $swal({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'ลงทะเบียนอุปกรณ์ใหม่สำเร็จ!',
+        showConfirmButton: false,
+        timer: 2000
+      })
+      
+      // Reset form และปิด modal
+      newDevice.value = { name: '', model: '', deviceId: '' }
+      showAddDeviceModal.value = false
+      
+      // โหลดรายการอุปกรณ์ใหม่
+      await fetchDevices()
+    } else {
+      // หากล้มเหลว ให้โยน error ที่ได้จาก composable
+      throw new Error(error.value || 'การลงทะเบียนอุปกรณ์ล้มเหลว')
+    }
+
+  } catch (err) {
+    // 4. แสดงข้อผิดพลาด
+    $swal({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: err.message || 'เกิดข้อผิดพลาดในการลงทะเบียนอุปกรณ์',
+      showConfirmButton: false,
+      timer: 3000
+    })
   }
 }
 
@@ -412,7 +535,6 @@ const formatDateTime = (dateString) => {
 
 onMounted(async() => {
   await fetchDevices()
-  console.log(devices.value)
 })
 
 definePageMeta({

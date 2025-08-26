@@ -126,7 +126,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { useAuth } from '~/composables/auth/useAuth'; // ตรวจสอบ path ให้ถูกต้อง
+import { useAuth } from '~/composable/auth/useAuth'; // ตรวจสอบ path ให้ถูกต้อง
 import { useNuxtApp } from '#app';
 
 useHead({
