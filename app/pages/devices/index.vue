@@ -383,7 +383,7 @@ const handleEdit = async () => {
     });
 
     if (success) {
-      $swal({
+      $swal.fire({
         toast: true,
         position: 'top-end',
         icon: 'success',
@@ -398,7 +398,7 @@ const handleEdit = async () => {
       throw new Error(error.value || 'Update failed');
     }
   } catch (error) {
-     $swal({
+     $swal.fire({
       toast: true,
       position: 'top-end',
       icon: 'error',
@@ -415,7 +415,7 @@ const handleEdit = async () => {
 }
 
 const handleResetDevice = async (device) => {
-  const result = await $swal({
+  const result = await $swal.fire({
     title: 'ยืนยันการลบ',
     text: `คุณต้องการลบอุปกรณ์ "${device.deviceName}" ใช่หรือไม่? ข้อมูลการวัดผลทั้งหมดจะถูกลบ`,
     icon: 'warning',
@@ -432,7 +432,7 @@ const handleResetDevice = async (device) => {
       const success = await resetDevice(device.id)
 
       if (success) {
-        $swal({
+        $swal.fire({
           toast: true,
           position: 'top-end',
           icon: 'success',
@@ -447,7 +447,7 @@ const handleResetDevice = async (device) => {
         throw new Error(error.value || 'การลบอุปกรณ์ล้มเหลว')
       }
     } catch (err) {
-      $swal({
+      $swal.fire({
         toast: true,
         position: 'top-end',
         icon: 'error',
@@ -485,7 +485,7 @@ const addDevice = async () => {
     const success = await registerDevice(newDevice.value.deviceId,payload)
 
     if (success) {
-      $swal({
+      $swal.fire({
         toast: true,
         position: 'top-end',
         icon: 'success',
@@ -507,7 +507,7 @@ const addDevice = async () => {
 
   } catch (err) {
     // 4. แสดงข้อผิดพลาด
-    $swal({
+    $swal.fire({
       toast: true,
       position: 'top-end',
       icon: 'error',

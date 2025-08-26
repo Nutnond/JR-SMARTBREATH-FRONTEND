@@ -240,7 +240,7 @@ const changePage = (newPage) => {
 // ✅ UPDATED: Renamed function to avoid confusion and call the aliased composable function
 // ✅ UPDATED: ฟังก์ชันที่ใช้ SweetAlert2 สำหรับการยืนยันและแสดงผล
 const handleDeleteRecord = async (recordId) => {
-    const result = await $swal({
+    const result = await $swal.fire({
         title: 'ยืนยันการลบ',
         text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? การกระทำนี้ไม่สามารถย้อนกลับได้",
         icon: 'warning',
@@ -257,7 +257,7 @@ const handleDeleteRecord = async (recordId) => {
         
         if (success) {
             // แสดง Toast เมื่อลบสำเร็จ
-            $swal({
+            $swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon: 'success',
@@ -271,7 +271,7 @@ const handleDeleteRecord = async (recordId) => {
         } else {
             // แสดง Toast เมื่อเกิดข้อผิดพลาด
             // error.value จะถูกกำหนดค่ามาจาก composable โดยอัตโนมัติ
-            $swal({
+            $swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon: 'error',

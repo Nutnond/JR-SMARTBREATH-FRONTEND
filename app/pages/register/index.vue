@@ -157,7 +157,7 @@ const showConfirmPassword = ref(false);
 // ✅ 2. ปรับปรุง watcher ให้แสดง SweetAlert Toast สำหรับ Error
 watch(error, (newError) => {
   if (newError) {
-    $swal({
+    $swal.fire({
         toast: true,
         position: 'top-end',
         icon: 'error',
@@ -174,12 +174,12 @@ const handleRegister = async () => {
   
   // --- Validation ---
   if (requiredFields.some(field => !formData.value[field])) {
-    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบถ้วน', showConfirmButton: false, timer: 3000 });
+    $swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบถ้วน', showConfirmButton: false, timer: 3000 });
     return;
   }
   
   if (formData.value.password !== formData.value.confirmPassword) {
-    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน', showConfirmButton: false, timer: 3000 });
+    $swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน', showConfirmButton: false, timer: 3000 });
     return;
   }
 
@@ -187,12 +187,12 @@ const handleRegister = async () => {
   const height = Number(formData.value.height);
 
   if (weight < 10 || weight > 500) {
-    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'ค่าน้ำหนักไม่ถูกต้อง (ต้องอยู่ระหว่าง 10 - 500 กก.)', showConfirmButton: false, timer: 3000 });
+    $swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'ค่าน้ำหนักไม่ถูกต้อง (ต้องอยู่ระหว่าง 10 - 500 กก.)', showConfirmButton: false, timer: 3000 });
     return;
   }
 
   if (height < 50 || height > 300) {
-    $swal({ toast: true, position: 'top-end', icon: 'warning', title: 'ค่าส่วนสูงไม่ถูกต้อง (ต้องอยู่ระหว่าง 50 - 300 ซม.)', showConfirmButton: false, timer: 3000 });
+    $swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'ค่าส่วนสูงไม่ถูกต้อง (ต้องอยู่ระหว่าง 50 - 300 ซม.)', showConfirmButton: false, timer: 3000 });
     return;
   }
   
@@ -205,7 +205,7 @@ const handleRegister = async () => {
 
   // --- Handle Success ---
   if (success) {
-    await $swal({
+    await $swal.fire({
         icon: 'success',
         title: 'สมัครสมาชิกสำเร็จ!',
         text: 'กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...',

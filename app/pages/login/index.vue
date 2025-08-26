@@ -153,7 +153,7 @@ const showPassword = ref(false);
 // 3. ✅ ปรับปรุง watcher ให้แสดง SweetAlert Toast (Error)
 watch(error, (newError) => {
   if (newError) {
-    $swal({
+    $swal.fire({
       toast: true,
       position: 'top-end',
       icon: 'error',
@@ -168,7 +168,7 @@ watch(error, (newError) => {
 const handleLogin = async () => {
   // --- Validation ---
   if (!formData.value.username || !formData.value.password) {
-    $swal({
+    $swal.fire({
       toast: true,
       position: 'top-end',
       icon: 'warning',
@@ -185,7 +185,7 @@ const handleLogin = async () => {
   // --- Handle Success ---
   if (success) {
     // แสดง Modal สวยๆ บอกว่าสำเร็จ และจะปิดเองเพื่อไปหน้าต่อไป
-     $swal({
+     $swal.fire({
       toast:true,
       position: 'top-end',
       icon: 'success',
