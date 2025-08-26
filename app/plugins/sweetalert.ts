@@ -4,17 +4,20 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import { defineNuxtPlugin } from '#app';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  // 1. Create a custom Swal instance using mixin
   const swalMixin = Swal.mixin({
     // Global settings can go here
   });
 
-  // 2. Provide a NEW function that calls the correct method
-  // This preserves the context of `swalMixin`
+  // ✅ ส่งออกเป็น Object ที่มีทั้ง .fire และ .Swal
   return {
     provide: {
-      swal: (options: import('sweetalert2').SweetAlertOptions) => {
-        return swalMixin.fire(options); // <-- The key change is here
+      swal: {
+        // ฟังก์ชันสำหรับ "ยิง" modal (ยังใช้งานเหมือนเดิม)
+        fire: (options: import('sweetalert2').SweetAlertOptions) => {
+          return swalMixin.fire(options);
+        },
+        // ส่งออก Class หลักของ Swal เพื่อให้เรียก static methods ได้
+        Swal: Swal,
       },
     },
   };

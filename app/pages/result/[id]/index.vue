@@ -4,15 +4,15 @@
 
       <div v-if="loading" class="text-center py-20">
         <p class="text-gray-500">กำลังโหลดข้อมูลผลการทดสอบ...</p>
-        </div>
-      
+      </div>
+
       <div v-else-if="error" class="text-center py-20">
         <p class="text-red-600 font-semibold">เกิดข้อผิดพลาด: {{ error }}</p>
         <button @click="goBack" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg">กลับไปหน้าก่อนหน้า</button>
       </div>
 
       <div v-else-if="resultData">
-        
+
         <div class="mb-4">
           <button @click="goBack"
             class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 transition-colors">
@@ -24,7 +24,7 @@
             ย้อนกลับ
           </button>
         </div>
-        
+
         <div class="mb-8">
           <div class="flex items-center justify-between">
             <div>
@@ -32,6 +32,7 @@
               <p class="text-gray-600">การวิเคราะห์ผลการทดสอบการทำงานของปอดอย่างละเอียด</p>
             </div>
             <button
+            @click="handleDownloadPdf"
               class="flex items-center justify-center gap-x-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2.5 font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -48,7 +49,11 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
               </div>
               <div>
                 <p class="text-sm text-gray-500">รหัสการทดสอบ</p>
@@ -57,7 +62,10 @@
             </div>
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
               </div>
               <div>
                 <p class="text-sm text-gray-500">วันที่วัดผล</p>
@@ -66,7 +74,11 @@
             </div>
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                  </path>
+                </svg>
               </div>
               <div>
                 <p class="text-sm text-gray-500">อุปกรณ์</p>
@@ -85,7 +97,11 @@
                 <p class="text-sm text-green-600 mt-1">{{ getSpO2Status(resultData.spo2) }}</p>
               </div>
               <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                  </path>
+                </svg>
               </div>
             </div>
           </div>
@@ -98,7 +114,10 @@
                 <p class="text-sm text-gray-600 mt-1">ปริมาตรอากาศที่หายใจออกใน 1 วินาที</p>
               </div>
               <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+                  </path>
+                </svg>
               </div>
             </div>
           </div>
@@ -111,7 +130,11 @@
                 <p class="text-sm text-gray-600 mt-1">ปริมาตรอากาศที่หายใจออกเต็มที่</p>
               </div>
               <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11">
+                  </path>
+                </svg>
               </div>
             </div>
           </div>
@@ -124,7 +147,11 @@
                 <p class="text-sm text-gray-600 mt-1">อัตราการไหลของอากาศสูงสุด</p>
               </div>
               <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2z"></path></svg>
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2z">
+                  </path>
+                </svg>
               </div>
             </div>
           </div>
@@ -171,8 +198,8 @@
                   <!-- วงกลมพื้นหลัง -->
                   <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" stroke-width="10"></circle>
                   <!-- วงกลมแสดงค่า -->
-                  <circle cx="50" cy="50" r="40" fill="none" :stroke="getRatioColor(parseFloat(resultData.fev1Fvc))" stroke-width="10" stroke-linecap="round"
-                    :stroke-dasharray="251.33"
+                  <circle cx="50" cy="50" r="40" fill="none" :stroke="getRatioColor(parseFloat(resultData.fev1Fvc))"
+                    stroke-width="10" stroke-linecap="round" :stroke-dasharray="251.33"
                     :stroke-dashoffset="251.33 - (parseFloat(resultData.fev1Fvc) * 251.33)"
                     class="transition-all duration-1000 ease-out"></circle>
                 </svg>
@@ -227,7 +254,8 @@
                   </div>
                   <div class="flex items-center justify-between p-3 bg-red-100 rounded-lg">
                     <span class="text-red-800 font-medium">การอุดกั้นรุนแรง</span>
-                    <span class="text-red-900 font-semibold">< 0.45</span>
+                    <span class="text-red-900 font-semibold">
+                      < 0.45</span>
                   </div>
                 </div>
               </div>
@@ -243,7 +271,9 @@
               <ul class="space-y-2">
                 <li v-for="recommendation in getRecommendations()" :key="recommendation"
                   class="flex items-start space-x-2">
-                  <svg class="w-5 h-5 mt-0.5 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg class="w-5 h-5 mt-0.5 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
                   <span class="text-sm">{{ recommendation }}</span>
                 </li>
               </ul>
@@ -263,12 +293,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { useRecordApi } from '~/composable/record/get-record';
 const router = useRouter();
 const route = useRoute();
+const { $swal } = useNuxtApp(); // Import SweetAlert สำหรับแสดงสถานะ
 
-const { 
-  record: resultData, 
-  loading, 
-  error, 
-  fetchRecordById 
+const {
+  record: resultData,
+  loading,
+  error,
+  fetchRecordById,
+  downloadReportPdf
 } = useRecordApi();
 
 const goBack = () => {
@@ -321,7 +353,7 @@ const getRatioColorClass = (ratio) => {
 
 const getRecommendations = () => {
   if (!resultData.value) return [];
-  
+
   const recommendations = [];
   const spo2 = resultData.value.spo2;
   const ratio = parseFloat(resultData.value.fev1Fvc);
@@ -400,6 +432,46 @@ const initCharts = async () => {
     });
   }
 }
+const handleDownloadPdf = async () => {
+  const recordId = route.params.id;
+  if (!recordId) return;
+
+  // 1. เปิด modal ด้วย $swal.fire
+  $swal.fire({
+    title: 'กำลังสร้างรายงาน...',
+    text: 'กรุณารอสักครู่ ระบบกำลังจัดทำไฟล์ PDF',
+    allowOutsideClick: false,
+    didOpen: () => {
+      // 2. เรียกใช้ static method ผ่าน $swal.Swal
+      $swal.Swal.showLoading();
+    }
+  });
+
+  const blob = await downloadReportPdf(recordId);
+
+  if (blob) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `report-${recordId}.pdf`;
+    document.body.appendChild(a);
+a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    // 3. ปิด modal ด้วย static method ผ่าน $swal.Swal
+    $swal.Swal.close();
+  } else {
+    // 4. แสดงข้อผิดพลาดด้วย $swal.fire
+    $swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: error.value || 'ไม่สามารถดาวน์โหลดไฟล์ PDF ได้'
+    });
+  }
+};
+
+
 
 onMounted(async () => {
   const recordId = route.params.id;

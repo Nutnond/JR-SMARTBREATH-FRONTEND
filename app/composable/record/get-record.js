@@ -114,6 +114,49 @@ export const useRecordApi = () => {
         }
     };
 
+    /**
+     * 📥 ดาวน์โหลดรายงานผลการทดสอบในรูปแบบ PDF
+     * @param {string} recordId - ID ของผลการทดสอบ
+     * @returns {Promise<Blob|null>} - คืนค่าเป็น Blob object ถ้าสำเร็จ, หรือ null ถ้าล้มเหลว
+     */
+    const downloadReportPdf = async (recordId) => {
+        if (!recordId) {
+            error.value = 'จำเป็นต้องระบุ ID ของผลการทดสอบ';
+            return null;
+        }
+
+        loading.value = true;
+        error.value = null;
+
+        if (!import.meta.client) {
+            loading.value = false;
+            return null;
+        }
+        const token = sessionStorage.getItem('accessToken');
+        if (!token) {
+            error.value = 'ไม่พบ Token สำหรับการยืนยันตัวตน';
+            loading.value = false;
+            return null;
+        }
+
+        try {
+            const blob = await $fetch(`${API_URL}/records/report/${recordId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+                // สำคัญ: กำหนด responseType เป็น 'blob' เพื่อรับไฟล์
+                responseType: 'blob' 
+            });
+            return blob;
+        } catch (err) {
+            error.value = err.data?.message || 'เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์ PDF';
+            console.error('Download PDF failed:', err);
+            return null;
+        } finally {
+            loading.value = false;
+        }
+    };
+
+
     return {
         records,
         record,
@@ -122,6 +165,7 @@ export const useRecordApi = () => {
         error,
         fetchRecords,
         fetchRecordById,
-        deleteRecord // ✅ EXPORTED: ส่งฟังก์ชัน delete ที่ปรับปรุงแล้วออกไป
+        deleteRecord,
+        downloadReportPdf
     };
 };
