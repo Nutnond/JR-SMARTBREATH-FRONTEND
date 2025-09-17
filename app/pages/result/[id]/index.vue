@@ -282,6 +282,8 @@
             </div>
           </div>
         </div>
+
+        <NongKunAnalyst class="mt-5" :record-id="route.params.id"/>
       </div>
     </div>
   </div>
@@ -291,6 +293,7 @@
 import { onMounted, nextTick, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRecordApi } from '~/composable/record/get-record';
+import NongKunAnalyst from '~/conponents/NongKunAnalyst.vue';
 const router = useRouter();
 const route = useRoute();
 const { $swal } = useNuxtApp(); // Import SweetAlert สำหรับแสดงสถานะ

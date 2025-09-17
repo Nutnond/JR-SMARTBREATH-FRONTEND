@@ -72,20 +72,6 @@ const menuItems = ref([
     icon: 'material-symbols:device-hub',
     color: 'from-purple-500 to-violet-600',
     route: '/devices'
-  },
-  {
-    title: 'รายงานผล',
-    description: 'สร้างและดาวน์โหลดรายงาน',
-    icon: 'lucide:file-text',
-    color: 'from-emerald-400 to-teal-600',
-    route: '/reports'
-  },
-  {
-    title: 'ประเมินผลโดย AI',
-    description: 'รับคำแนะนำจาก AI ผู้เชี่ยวชาญ',
-    icon: 'lucide:brain-circuit',
-    color: 'from-amber-400 to-orange-600',
-    route: '/ai-assessment'
   }
 ])
 

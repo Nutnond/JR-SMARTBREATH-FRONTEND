@@ -94,16 +94,15 @@
               <option disabled value="">เลือกเพศ</option>
               <option value="Male">ชาย</option>
               <option value="Female">หญิง</option>
+              <option value="Other">อื่นๆ</option>
             </select>
           </div>
 
           <div>
-            <label for="age" class="block text-sm font-semibold text-blue-700 mb-2">อายุ</label>
-            <input v-model="formData.age" id="age" type="number" min="1" required
-              class="w-full px-4 py-3 bg-white/70 border border-blue-200/50 rounded-2xl text-blue-900 placeholder-blue-400/70 focus:ring-2 focus:ring-blue-400/50" 
-              placeholder="กรอกอายุ" />
+            <label for="dob" class="block text-sm font-semibold text-blue-700 mb-2">วันเดือนปีเกิด</label>
+            <input v-model="formData.dob" id="dob" type="date" :max="maxDate" required
+              class="w-full px-4 py-3 bg-white/70 border border-blue-200/50 rounded-2xl text-blue-900 placeholder-blue-400/70 focus:ring-2 focus:ring-blue-400/50" />
           </div>
-
           <button @click="handleRegister" :disabled="loading"
             class="w-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:to-blue-800 disabled:opacity-50 text-white font-semibold py-3.5 px-4 rounded-2xl shadow-lg transition-all duration-300">
             <span class="flex items-center justify-center">
@@ -126,7 +125,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { useAuth } from '~/composable/auth/useAuth'; // ตรวจสอบ path ให้ถูกต้อง
+import { useAuth } from '~/composable/auth/useAuth';
 import { useNuxtApp } from '#app';
 
 useHead({
@@ -134,10 +133,10 @@ useHead({
   meta: [{ name: 'description', content: 'สมัครสมาชิก JR SMARTBREATH เพื่อดูแลสุขภาพการหายใจของคุณ' }]
 });
 
-// ✅ 1. เรียกใช้ $swal และ useAuth
 const { $swal } = useNuxtApp();
 const { register, loading, error } = useAuth();
 
+// START: Change 'age' to 'dob'
 const formData = ref({
   username: '',
   firstName: '',
@@ -148,13 +147,17 @@ const formData = ref({
   weight: '',
   height: '',
   gender: '',
-  age: ''
+  dob: '' // เปลี่ยนจาก age เป็น dob
 });
+
+// สร้างค่า max date สำหรับ input เพื่อไม่ให้เลือกวันในอนาคตได้
+const today = new Date();
+const maxDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+// END: Change 'age' to 'dob'
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-// ✅ 2. ปรับปรุง watcher ให้แสดง SweetAlert Toast สำหรับ Error
 watch(error, (newError) => {
   if (newError) {
     $swal.fire({
@@ -168,15 +171,16 @@ watch(error, (newError) => {
   }
 });
 
-// ✅ 3. ปรับปรุง handleRegister ทั้งหมดให้ใช้ SweetAlert
 const handleRegister = async () => {
-  const requiredFields = ['username', 'firstName', 'lastName', 'email', 'password', 'confirmPassword', 'weight', 'height', 'gender', 'age'];
+  // START: Update validation logic for 'dob'
+  const requiredFields = ['username', 'firstName', 'lastName', 'email', 'password', 'confirmPassword', 'weight', 'height', 'gender', 'dob'];
   
   // --- Validation ---
   if (requiredFields.some(field => !formData.value[field])) {
     $swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบถ้วน', showConfirmButton: false, timer: 3000 });
     return;
   }
+  // END: Update validation logic for 'dob'
   
   if (formData.value.password !== formData.value.confirmPassword) {
     $swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน', showConfirmButton: false, timer: 3000 });
@@ -196,9 +200,12 @@ const handleRegister = async () => {
     return;
   }
   
-  // --- Prepare Payload ---
-  const payload = { ...formData.value, weight, height, age: Number(formData.value.age) };
+  // START: Prepare payload with 'dob'
+  const payload = { ...formData.value, weight, height };
   delete payload.confirmPassword;
+  // ไม่ต้องแปลง dob เพราะ v-model จาก <input type="date"> จะได้ค่าเป็น string 'YYYY-MM-DD' อยู่แล้ว
+  // ซึ่งตรงกับที่ Joi schema คาดหวัง
+  // END: Prepare payload with 'dob'
 
   // --- Call Register API ---
   const success = await register(payload);
@@ -215,7 +222,6 @@ const handleRegister = async () => {
     });
     navigateTo('/login');
   }
-  // กรณีไม่สำเร็จ, watcher จะแสดง error toast ให้อัตโนมัติ
 };
 
 definePageMeta({
