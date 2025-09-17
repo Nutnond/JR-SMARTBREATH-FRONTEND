@@ -23,7 +23,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      BASE_API_URL:''
+      BASE_API_URL:'',
+      AGENT_API_URL:''
     } 
   },
   css: [ '~/assets/css/main.css'],

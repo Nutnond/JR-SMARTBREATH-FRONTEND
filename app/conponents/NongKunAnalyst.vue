@@ -228,7 +228,9 @@ import { useUserStore } from '#imports'
 /** =========================
  * Config/Env
  * ========================= */
-const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000') + '/agent/analyze'
+const config = useRuntimeConfig();
+const AGENT_URL = config.public.AGENT_API_URL || 'http://127.0.0.1:8000/';
+const API_URL = (AGENT_URL) + 'agent/analyze'
 const props = defineProps({
   recordId: {
     type: String,
