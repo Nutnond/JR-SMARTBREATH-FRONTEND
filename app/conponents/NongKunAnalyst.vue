@@ -36,51 +36,65 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อ</label>
-            <input v-model="otherUserData.name" type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="กรอกชื่อ" />
+            <input v-model="otherUserData.name" type="text" @blur="validateField('name')"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" :class="{
+                'border-red-500 focus:ring-red-500': errors.name,
+                'border-gray-300 focus:ring-blue-500': !errors.name
+              }" placeholder="กรอกชื่อ" />
+            <p v-if="errors.name" class="mt-1 text-xs text-red-600">{{ errors.name }}</p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">อายุ (ปี)</label>
-            <input v-model.number="otherUserData.age" type="number"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="กรอกอายุ" min="1" max="120" />
+            <input v-model.number="otherUserData.age" type="number" @blur="validateField('age')"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" :class="{
+                'border-red-500 focus:ring-red-500': errors.age,
+                'border-gray-300 focus:ring-blue-500': !errors.age
+              }" placeholder="กรอกอายุ" min="1" max="120" />
+            <p v-if="errors.age" class="mt-1 text-xs text-red-600">{{ errors.age }}</p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">เพศ</label>
-            <select v-model="otherUserData.gender"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select v-model="otherUserData.gender" @change="validateField('gender')" @blur="validateField('gender')"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" :class="{
+                'border-red-500 focus:ring-red-500': errors.gender,
+                'border-gray-300 focus:ring-blue-500': !errors.gender
+              }">
               <option value="">เลือกเพศ</option>
               <option value="male">ชาย</option>
               <option value="female">หญิง</option>
-              <option value="other">อื่นๆ</option>
             </select>
+            <p v-if="errors.gender" class="mt-1 text-xs text-red-600">{{ errors.gender }}</p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">น้ำหนัก (กก.)</label>
-            <input v-model.number="otherUserData.weight" type="number"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="กรอกน้ำหนัก" min="1" max="500" step="0.1" />
+            <input v-model.number="otherUserData.weight" type="number" @blur="validateField('weight')"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" :class="{
+                'border-red-500 focus:ring-red-500': errors.weight,
+                'border-gray-300 focus:ring-blue-500': !errors.weight
+              }" placeholder="กรอกน้ำหนัก" min="1" max="500" step="0.1" />
+            <p v-if="errors.weight" class="mt-1 text-xs text-red-600">{{ errors.weight }}</p>
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">ส่วนสูง (ซม.)</label>
-            <input v-model.number="otherUserData.height" type="number"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="กรอกส่วนสูง" min="50" max="250" />
+            <input v-model.number="otherUserData.height" type="number" @blur="validateField('height')"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" :class="{
+                'border-red-500 focus:ring-red-500': errors.height,
+                'border-gray-300 focus:ring-blue-500': !errors.height
+              }" placeholder="กรอกส่วนสูง" min="50" max="250" />
+            <p v-if="errors.height" class="mt-1 text-xs text-red-600">{{ errors.height }}</p>
           </div>
         </div>
 
         <div class="flex justify-between mt-6">
-          <button @click="goBack"
-            class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+          <button @click="goBack" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
             ย้อนกลับ
           </button>
           <button @click="analyzeSymptoms" :disabled="!isUserDataValid || isAnalyzing"
-            class="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
             <span v-if="isAnalyzing">กำลังวิเคราะห์...</span>
             <span v-else>วิเคราะห์</span>
           </button>
@@ -132,9 +146,11 @@
     </div>
 
     <div v-if="currentStep === 4 && (isAnalyzing || analysisResult)" class="space-y-6">
-      <div class="relative bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl shadow-md border border-purple-100">
+      <div
+        class="relative bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl shadow-md border border-purple-100">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3">
+          <h2
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3">
             🤖 ผลการวิเคราะห์จากน้องขุน
           </h2>
           <div class="flex items-center gap-2">
@@ -145,38 +161,34 @@
           </div>
         </div>
 
-        <!-- Premium Loading State -->
         <div v-if="isAnalyzing" class="relative">
-          <!-- Animated Background -->
-          <div class="absolute inset-0 bg-gradient-to-r from-purple-100 via-indigo-100 to-blue-100 rounded-xl opacity-50 animate-pulse"></div>
-          
-          <!-- Main Loading Container -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-purple-100 via-indigo-100 to-blue-100 rounded-xl opacity-50 animate-pulse">
+          </div>
+
           <div class="relative bg-white/80 backdrop-blur-sm p-8 rounded-xl border border-purple-200 shadow-lg">
-            <!-- AI Brain Animation -->
             <div class="flex flex-col items-center justify-center space-y-6">
               <div class="relative">
-                <!-- Outer spinning ring -->
                 <div class="w-20 h-20 border-4 border-purple-200 rounded-full animate-spin">
                   <div class="absolute top-2 left-2 w-2 h-2 bg-purple-600 rounded-full animate-pulse"></div>
                   <div class="absolute top-2 right-2 w-2 h-2 bg-indigo-600 rounded-full animate-pulse delay-300"></div>
                   <div class="absolute bottom-2 left-2 w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-500"></div>
-                  <div class="absolute bottom-2 right-2 w-2 h-2 bg-purple-600 rounded-full animate-pulse delay-700"></div>
+                  <div class="absolute bottom-2 right-2 w-2 h-2 bg-purple-600 rounded-full animate-pulse delay-700">
+                  </div>
                 </div>
-                
-                <!-- Inner AI brain -->
+
                 <div class="absolute inset-0 flex items-center justify-center">
                   <div class="text-3xl animate-bounce">🧠</div>
                 </div>
               </div>
-              
-              <!-- Status Text -->
+
               <div class="text-center space-y-3">
                 <h3 class="text-xl font-bold text-purple-800">น้องขุนกำลังวิเคราะห์ข้อมูลของคุณ</h3>
-                
-                <!-- Time Indicator -->
+
                 <div class="flex items-center justify-center space-x-2 text-sm text-purple-500">
                   <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span>โดยประมาณ 1-5 นาที</span>
                 </div>
@@ -185,16 +197,13 @@
           </div>
         </div>
 
-        <!-- Results Container -->
-        <div v-if="!isAnalyzing && analysisResult" 
-             ref="resultBox" 
-             class="bg-white/90 backdrop-blur-sm p-6 rounded-xl border-l-4 border-purple-500 shadow-lg max-h-[60vh] overflow-auto">
+        <div v-if="!isAnalyzing && analysisResult" ref="resultBox"
+          class="bg-white/90 backdrop-blur-sm p-6 rounded-xl border-l-4 border-purple-500 shadow-lg max-h-[60vh] overflow-auto">
           <div class="prose max-w-none" v-html="renderedAnalysis"></div>
         </div>
 
-        <!-- Warning Box -->
-        <div v-if="!isAnalyzing && analysisResult" 
-             class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 p-4 rounded-xl mt-6 shadow-sm">
+        <div v-if="!isAnalyzing && analysisResult"
+          class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 p-4 rounded-xl mt-6 shadow-sm">
           <div class="flex">
             <div class="text-red-600 mr-3 text-lg">⚠️</div>
             <div class="text-sm text-red-800">
@@ -204,7 +213,6 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="flex justify-between mt-6">
           <button @click="resetAnalysis" v-if="!isAnalyzing"
             class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-md hover:shadow-lg">
@@ -269,6 +277,10 @@ const otherUserData = ref({
   height: null
 })
 
+// ✨ START: Added for validation
+const errors = ref({})
+// ✨ END: Added for validation
+
 /** =========================
  * Loading Animation
  * ========================= */
@@ -302,6 +314,52 @@ function hydrateOwnerFromStore() {
 }
 
 /** =========================
+ * Validation ✨ NEW
+ * ========================= */
+const validateField = (field) => {
+  const d = otherUserData.value
+  let errorMsg = ''
+
+  switch (field) {
+    case 'name':
+      if (!d.name || d.name.trim() === '') errorMsg = 'กรุณากรอกชื่อ'
+      else if (d.name.length > 100) errorMsg = 'ชื่อต้องมีความยาวไม่เกิน 100 ตัวอักษร'
+      break
+    case 'age':
+      if (d.age === null || d.age === '') errorMsg = 'กรุณากรอกอายุ'
+      else if (!Number.isInteger(d.age) || d.age < 1 || d.age > 120) errorMsg = 'อายุต้องเป็นตัวเลขจำนวนเต็มระหว่าง 1-120 ปี'
+      break
+    case 'gender':
+      if (!d.gender) errorMsg = 'กรุณาเลือกเพศ'
+      break
+    case 'weight':
+      if (d.weight === null || d.weight === '') errorMsg = 'กรุณากรอกน้ำหนัก'
+      else if (d.weight < 1 || d.weight > 500) errorMsg = 'น้ำหนักต้องอยู่ระหว่าง 1-500 กก.'
+      break
+    case 'height':
+      if (d.height === null || d.height === '') errorMsg = 'กรุณากรอกส่วนสูง'
+      else if (!Number.isInteger(d.height) || d.height < 50 || d.height > 250) errorMsg = 'ส่วนสูงต้องเป็นตัวเลขจำนวนเต็มระหว่าง 50-250 ซม.'
+      break
+  }
+
+  if (errorMsg) {
+    errors.value[field] = errorMsg
+  } else {
+    delete errors.value[field]
+  }
+}
+
+const validateAllFields = () => {
+  // Clear old errors and validate all fields
+  validateField('name')
+  validateField('age')
+  validateField('gender')
+  validateField('weight')
+  validateField('height')
+  return Object.keys(errors.value).length === 0
+}
+
+/** =========================
  * Computed
  * ========================= */
 const isUserDataValid = computed(() => {
@@ -318,6 +376,7 @@ const selectUserType = (type) => {
   currentStep.value = 2
 }
 const goBack = () => {
+  errors.value = {} // ✨ Clear errors on navigation
   if (currentStep.value === 4) {
     currentStep.value = 2
     return
@@ -325,6 +384,7 @@ const goBack = () => {
   if (currentStep.value > 1) currentStep.value--
 }
 const resetAnalysis = () => {
+  errors.value = {} // ✨ Clear errors on reset
   stopStreaming()
   stopLoadingAnimation()
   currentStep.value = 1
@@ -471,6 +531,14 @@ ${msg}
  * Actions
  * ========================= */
 const analyzeSymptoms = async () => {
+  // ✨ START: Added validation check before submitting
+  if (userType.value === 'other') {
+    if (!validateAllFields()) {
+      return // Stop execution if validation fails
+    }
+  }
+  // ✨ END: Added validation check
+
   isAnalyzing.value = true
   analysisResult.value = ''
   currentStep.value = 4
@@ -561,36 +629,51 @@ onBeforeUnmount(() => {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: .5;
   }
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-25%);
-    animation-timing-function: cubic-bezier(0.8,0,1,1);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
+
   50% {
     transform: none;
-    animation-timing-function: cubic-bezier(0,0,0.2,1);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
 
 /* Gradient animations */
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .bg-gradient-to-r {
