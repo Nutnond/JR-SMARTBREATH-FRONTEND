@@ -538,7 +538,7 @@ onMounted(async() => {
 })
 
 definePageMeta({
-  title: "JR-SMARTBREATH - จัดการอุปกรณ์",
+  title: "SMARTBREATH - จัดการอุปกรณ์",
   middleware: 'auth'
 })
 </script>

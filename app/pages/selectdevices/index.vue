@@ -199,7 +199,7 @@ onMounted(async() => {
 })
 
 definePageMeta({
-  title:"JR-SMARTBREATH",
+  title:"SMARTBREATH",
   middleware:'auth'
 })
 </script>
