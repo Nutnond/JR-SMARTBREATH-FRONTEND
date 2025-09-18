@@ -263,7 +263,7 @@
           </div>
         </div>
 
-        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+        <!-- <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
           <h3 class="text-xl font-semibold mb-4">คำแนะนำและขั้นตอนถัดไป</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -281,8 +281,8 @@
             <div>
             </div>
           </div>
-        </div>
-
+        </div> -->
+        <PulmonaryFunctionTable class="mt-8"/>
         <NongKunAnalyst class="mt-5" :record-id="route.params.id"/>
       </div>
     </div>
@@ -294,6 +294,7 @@ import { onMounted, nextTick, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRecordApi } from '~/composable/record/get-record';
 import NongKunAnalyst from '~/conponents/NongKunAnalyst.vue';
+import PulmonaryFunctionTable from '~/conponents/PulmonaryFunctionTable.vue';
 const router = useRouter();
 const route = useRoute();
 const { $swal } = useNuxtApp(); // Import SweetAlert สำหรับแสดงสถานะ
