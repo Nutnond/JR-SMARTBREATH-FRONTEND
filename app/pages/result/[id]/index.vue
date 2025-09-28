@@ -312,10 +312,18 @@ const {
 // สมมติข้อมูลผู้ใช้ปัจจุบัน (ใช้แทนการเรียกจาก useAuthStore)
 const userStore = useUserStore();
 
+const getGenderText = (gender) => {
+  if (!gender) {
+    return 'ไม่ระบุ';
+  }
+  const map = { male: 'ชาย', female: 'หญิง', other: 'อื่นๆ' };
+  return map[gender.toLowerCase()] || 'ไม่ระบุ';
+}
+
 const CurrentUser = {
   name: userStore.fullName,
   age: userStore.age,
-  gender: userStore.gender,
+  gender: getGenderText(userStore.gender),
   height: userStore.height,
   weight: userStore.weight
 }
