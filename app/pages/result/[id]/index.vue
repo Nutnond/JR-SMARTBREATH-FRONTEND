@@ -31,8 +31,7 @@
               <h1 class="text-3xl font-bold text-gray-900 mb-2">ผลการทดสอบสมรรถภาพปอด</h1>
               <p class="text-gray-600">การวิเคราะห์ผลการทดสอบการทำงานของปอดอย่างละเอียด</p>
             </div>
-            <button
-            @click="handleDownloadPdf"
+            <button @click="handleDownloadPdf"
               class="flex items-center justify-center gap-x-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2.5 font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -282,22 +281,25 @@
             </div>
           </div>
         </div> -->
-        <PulmonaryFunctionTable class="mt-8"/>
-        <NongKunAnalyst class="mt-5" :record-id="route.params.id"/>
+        <PulmonaryFunctionTable class="mt-8" />
+        <NongKunAnalyst class="mt-5" :record-id="route.params.id" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+
 import { onMounted, nextTick, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRecordApi } from '~/composable/record/get-record';
 import NongKunAnalyst from '~/conponents/NongKunAnalyst.vue';
 import PulmonaryFunctionTable from '~/conponents/PulmonaryFunctionTable.vue';
+// สมมติว่านี่คือการนำเข้า useAuthStore
+import { useUserStore } from '#imports';
 const router = useRouter();
 const route = useRoute();
-const { $swal } = useNuxtApp(); // Import SweetAlert สำหรับแสดงสถานะ
+const { $swal } = useNuxtApp();
 
 const {
   record: resultData,
@@ -306,6 +308,17 @@ const {
   fetchRecordById,
   downloadReportPdf
 } = useRecordApi();
+
+// สมมติข้อมูลผู้ใช้ปัจจุบัน (ใช้แทนการเรียกจาก useAuthStore)
+const userStore = useUserStore();
+
+const CurrentUser = {
+  name: userStore.fullName,
+  age: userStore.age,
+  gender: userStore.gender,
+  height: userStore.height,
+  weight: userStore.weight
+}
 
 const goBack = () => {
   router.back();
@@ -340,7 +353,6 @@ const getRatioStatus = (ratio) => {
   return 'การอุดกั้นรุนแรง';
 }
 
-// เพิ่มฟังก์ชันสำหรับกำหนดสีตามค่า ratio
 const getRatioColor = (ratio) => {
   if (ratio > 0.75) return '#10b981'; // เขียว - ปกติ
   if (ratio >= 0.60) return '#f59e0b'; // เหลือง - เล็กน้อย
@@ -353,33 +365,6 @@ const getRatioColorClass = (ratio) => {
   if (ratio >= 0.60) return 'text-yellow-600';
   if (ratio >= 0.45) return 'text-orange-600';
   return 'text-red-600';
-}
-
-const getRecommendations = () => {
-  if (!resultData.value) return [];
-
-  const recommendations = [];
-  const spo2 = resultData.value.spo2;
-  const ratio = parseFloat(resultData.value.fev1Fvc);
-
-  if (spo2 >= 95) {
-    recommendations.push('ระดับความอิ่มตัวของออกซิเจนของคุณอยู่ในเกณฑ์ปกติ');
-  } else {
-    recommendations.push('ควรปรึกษาแพทย์เพื่อพิจารณาการบำบัดด้วยออกซิเจน');
-  }
-
-  if (ratio > 0.75) {
-    recommendations.push('รักษาสุขภาพทางเดินหายใจตามแนวทางปฏิบัติปัจจุบัน');
-    recommendations.push('ออกกำลังกายอย่างสม่ำเสมอต่อไป');
-  } else {
-    recommendations.push('ควรปรึกษาอายุรแพทย์โรคระบบการหายใจเพื่อประเมินเพิ่มเติม');
-    recommendations.push('พิจารณาเข้าร่วมโปรแกรมฟื้นฟูสมรรถภาพปอด');
-  }
-
-  recommendations.push('หลีกเลี่ยงการสูบบุหรี่และการสัมผัสควันบุหรี่มือสอง');
-  recommendations.push('ควรติดตามผลในอีก 6-12 เดือน');
-
-  return recommendations;
 }
 
 const initCharts = async () => {
@@ -436,45 +421,446 @@ const initCharts = async () => {
     });
   }
 }
+
 const handleDownloadPdf = async () => {
   const recordId = route.params.id;
   if (!recordId) return;
 
-  // 1. เปิด modal ด้วย $swal.fire
-  $swal.fire({
-    title: 'กำลังสร้างรายงาน...',
-    text: 'กรุณารอสักครู่ ระบบกำลังจัดทำไฟล์ PDF',
-    allowOutsideClick: false,
+  // 1. แสดง Modal ให้เลือกผู้รับรายงาน - สไตล์ใหม่
+  const { value: recipientType } = await $swal.fire({
+    title: '<strong>📋 รายงานนี้สำหรับใคร?</strong>',
+    html: `
+      <div class="mt-4 space-y-4">
+        <div class="flex flex-col gap-4">
+          <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
+            <input type="radio" name="recipient" value="current" class="sr-only">
+            <div class="flex items-center justify-center w-5 h-5 border-2 border-blue-500 rounded-full mr-4">
+              <div class="w-3 h-3 bg-blue-500 rounded-full opacity-0 transition-opacity duration-200"></div>
+            </div>
+            <div class="flex-1 text-left">
+              <div class="font-semibold text-gray-900">👤 ผู้ใช้งานปัจจุบัน</div>
+              <div class="text-sm text-gray-500">ใช้ข้อมูลจากโปรไฟล์ของคุณ</div>
+            </div>
+          </label>
+          
+          <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:bg-green-50 hover:border-green-300 transition-all duration-200">
+            <input type="radio" name="recipient" value="other" class="sr-only">
+            <div class="flex items-center justify-center w-5 h-5 border-2 border-green-500 rounded-full mr-4">
+              <div class="w-3 h-3 bg-green-500 rounded-full opacity-0 transition-opacity duration-200"></div>
+            </div>
+            <div class="flex-1 text-left">
+              <div class="font-semibold text-gray-900">👥 บุคคลอื่น</div>
+              <div class="text-sm text-gray-500">กรอกข้อมูลใหม่สำหรับผู้รับรายงาน</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    `,
+    width: '500px',
+    showCancelButton: true,
+    confirmButtonText: 'ถัดไป',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#3b82f6',
+    cancelButtonColor: '#ef4444',
+    customClass: {
+      popup: 'rounded-2xl shadow-2xl',
+      title: 'text-xl',
+      confirmButton: 'rounded-lg px-6 py-2 font-medium',
+      cancelButton: 'rounded-lg px-6 py-2 font-medium'
+    },
     didOpen: () => {
-      // 2. เรียกใช้ static method ผ่าน $swal.Swal
-      $swal.Swal.showLoading();
+      // เพิ่ม event listeners สำหรับ custom radio buttons
+      const radioInputs = document.querySelectorAll('input[name="recipient"]');
+      const radioVisuals = document.querySelectorAll('.w-3.h-3');
+      
+      // ตั้งค่าเริ่มต้น
+      radioInputs[0].checked = true;
+      radioVisuals[0].classList.remove('opacity-0');
+      
+      radioInputs.forEach((input, index) => {
+        input.addEventListener('change', () => {
+          radioVisuals.forEach(visual => visual.classList.add('opacity-0'));
+          if (input.checked) {
+            radioVisuals[index].classList.remove('opacity-0');
+          }
+        });
+      });
+    },
+    preConfirm: () => {
+      const selectedRadio = document.querySelector('input[name="recipient"]:checked');
+      if (!selectedRadio) {
+        $swal.showValidationMessage('กรุณาเลือกผู้รับรายงาน');
+        return false;
+      }
+      return selectedRadio.value;
     }
   });
 
-  const blob = await downloadReportPdf(recordId);
+  if (!recipientType) return;
 
-  if (blob) {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `report-${recordId}.pdf`;
-    document.body.appendChild(a);
-a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
+  let reportBody = {};
+  let userData = {};
+  let isCurrentUser = recipientType === 'current';
 
-    // 3. ปิด modal ด้วย static method ผ่าน $swal.Swal
-    $swal.Swal.close();
+  if (isCurrentUser) {
+    userData = CurrentUser;
   } else {
-    // 4. แสดงข้อผิดพลาดด้วย $swal.fire
+    // 2. Modal สำหรับกรอกข้อมูลบุคคลอื่น - ปรับปรุงใหม่
+    const { value: formValues } = await $swal.fire({
+      title: '<strong>📝 กรอกข้อมูลผู้รับรายงาน</strong>',
+      html: `
+        <div class="mt-6 space-y-5">
+          <!-- ชื่อ -->
+          <div class="text-left">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-user mr-2"></i>ชื่อ-นามสกุล
+            </label>
+            <input 
+              id="patient-name" 
+              type="text" 
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
+              placeholder="กรอกชื่อ-นามสกุล"
+              maxlength="100"
+            >
+            <div class="text-xs text-red-500 mt-1 hidden" id="name-error">กรุณากรอกชื่อ-นามสกุล</div>
+          </div>
+
+          <!-- อายุ -->
+          <div class="text-left">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-birthday-cake mr-2"></i>อายุ (ปี)
+            </label>
+            <input 
+              id="patient-age" 
+              type="number" 
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
+              placeholder="กรอกอายุ"
+              min="1" 
+              max="150"
+            >
+            <div class="text-xs text-red-500 mt-1 hidden" id="age-error">อายุต้องอยู่ระหว่าง 1-150 ปี</div>
+          </div>
+
+          <!-- เพศ -->
+          <div class="text-left">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-venus-mars mr-2"></i>เพศ
+            </label>
+            <select 
+              id="patient-gender" 
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
+            >
+              <option value="">เลือกเพศ</option>
+              <option value="ชาย">👨 ชาย</option>
+              <option value="หญิง">👩 หญิง</option>
+            </select>
+            <div class="text-xs text-red-500 mt-1 hidden" id="gender-error">กรุณาเลือกเพศ</div>
+          </div>
+
+          <!-- ส่วนสูงและน้ำหนัก -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-left">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-ruler-vertical mr-2"></i>ส่วนสูง (ซม.)
+              </label>
+              <input 
+                id="patient-height" 
+                type="number" 
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
+                placeholder="เช่น 165"
+                min="50" 
+                max="250"
+              >
+              <div class="text-xs text-red-500 mt-1 hidden" id="height-error">ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.</div>
+            </div>
+            
+            <div class="text-left">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-weight mr-2"></i>น้ำหนัก (กก.)
+              </label>
+              <input 
+                id="patient-weight" 
+                type="number" 
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
+                placeholder="เช่น 60"
+                min="10" 
+                max="300"
+              >
+              <div class="text-xs text-red-500 mt-1 hidden" id="weight-error">น้ำหนักต้องอยู่ระหว่าง 10-300 กก.</div>
+            </div>
+          </div>
+        </div>
+      `,
+      width: '600px',
+      focusConfirm: false,
+      confirmButtonText: 'สร้างรายงาน',
+      cancelButtonText: 'ย้อนกลับ',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#6b7280',
+      customClass: {
+        popup: 'rounded-2xl shadow-2xl',
+        title: 'text-xl',
+        htmlContainer: 'text-left',
+        confirmButton: 'rounded-lg px-6 py-2 font-medium',
+        cancelButton: 'rounded-lg px-6 py-2 font-medium'
+      },
+      didOpen: () => {
+        // เพิ่ม Font Awesome สำหรับไอคอน
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+          document.head.appendChild(link);
+        }
+
+        // เพิ่ม real-time validation
+        const inputs = ['name', 'age', 'gender', 'height', 'weight'];
+        inputs.forEach(inputName => {
+          const element = document.getElementById(`patient-${inputName}`);
+          if (element) {
+            element.addEventListener('input', () => validateField(inputName));
+            element.addEventListener('blur', () => validateField(inputName));
+          }
+        });
+      },
+      preConfirm: () => {
+        const name = document.getElementById('patient-name').value.trim();
+        const age = parseInt(document.getElementById('patient-age').value);
+        const gender = document.getElementById('patient-gender').value;
+        const height = parseInt(document.getElementById('patient-height').value);
+        const weight = parseInt(document.getElementById('patient-weight').value);
+
+        let isValid = true;
+        
+        // Validate ชื่อ
+        if (!name || name.length < 2) {
+          showFieldError('name', 'กรุณากรอกชื่อ-นามสกุล (อย่างน้อย 2 ตัวอักษร)');
+          isValid = false;
+        }
+
+        // Validate อายุ
+        if (!age || age < 1 || age > 150) {
+          showFieldError('age', 'อายุต้องอยู่ระหว่าง 1-150 ปี');
+          isValid = false;
+        }
+
+        // Validate เพศ
+        if (!gender) {
+          showFieldError('gender', 'กรุณาเลือกเพศ');
+          isValid = false;
+        }
+
+        // Validate ส่วนสูง
+        if (!height || height < 50 || height > 250) {
+          showFieldError('height', 'ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.');
+          isValid = false;
+        }
+
+        // Validate น้ำหนัก
+        if (!weight || weight < 10 || weight > 300) {
+          showFieldError('weight', 'น้ำหนักต้องอยู่ระหว่าง 10-300 กก.');
+          isValid = false;
+        }
+
+        // ตรวจสอบ BMI ว่าสมเหตุสมผลหรือไม่
+        if (height && weight) {
+          const bmi = weight / Math.pow(height / 100, 2);
+          if (bmi < 10 || bmi > 60) {
+            $swal.showValidationMessage('ค่า BMI ผิดปกติ กรุณาตรวจสอบส่วนสูงและน้ำหนักอีกครั้ง');
+            isValid = false;
+          }
+        }
+
+        if (!isValid) {
+          return false;
+        }
+
+        return { name, age, gender, height, weight };
+      }
+    });
+
+    if (!formValues) return;
+    userData = formValues;
+  }
+
+  // Helper functions สำหรับ validation
+  function validateField(fieldName) {
+    const element = document.getElementById(`patient-${fieldName}`);
+    const errorElement = document.getElementById(`${fieldName}-error`);
+    
+    if (!element || !errorElement) return;
+
+    let isValid = true;
+    let errorMessage = '';
+
+    switch (fieldName) {
+      case 'name':
+        const name = element.value.trim();
+        if (!name || name.length < 2) {
+          isValid = false;
+          errorMessage = 'กรุณากรอกชื่อ-นามสกุล (อย่างน้อย 2 ตัวอักษร)';
+        }
+        break;
+      case 'age':
+        const age = parseInt(element.value);
+        if (!age || age < 1 || age > 150) {
+          isValid = false;
+          errorMessage = 'อายุต้องอยู่ระหว่าง 1-150 ปี';
+        }
+        break;
+      case 'gender':
+        if (!element.value) {
+          isValid = false;
+          errorMessage = 'กรุณาเลือกเพศ';
+        }
+        break;
+      case 'height':
+        const height = parseInt(element.value);
+        if (!height || height < 50 || height > 250) {
+          isValid = false;
+          errorMessage = 'ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.';
+        }
+        break;
+      case 'weight':
+        const weight = parseInt(element.value);
+        if (!weight || weight < 10 || weight > 300) {
+          isValid = false;
+          errorMessage = 'น้ำหนักต้องอยู่ระหว่าง 10-300 กก.';
+        }
+        break;
+    }
+
+    if (isValid) {
+      element.classList.remove('border-red-500');
+      element.classList.add('border-green-500');
+      errorElement.classList.add('hidden');
+    } else {
+      element.classList.remove('border-green-500');
+      element.classList.add('border-red-500');
+      errorElement.textContent = errorMessage;
+      errorElement.classList.remove('hidden');
+    }
+
+    return isValid;
+  }
+
+  function showFieldError(fieldName, message) {
+    const element = document.getElementById(`patient-${fieldName}`);
+    const errorElement = document.getElementById(`${fieldName}-error`);
+    
+    if (element && errorElement) {
+      element.classList.add('border-red-500');
+      element.classList.remove('border-green-500');
+      errorElement.textContent = message;
+      errorElement.classList.remove('hidden');
+    }
+  }
+
+  // 3. เตรียม Body สำหรับ API Call
+  reportBody = {
+    patientInfo: {
+      name: userData.name,
+      age: userData.age,
+      gender: userData.gender,
+      height: userData.height,
+      weight: userData.weight,
+    },
+    isCurrentUser: isCurrentUser
+  };
+
+  // 4. แสดง loading modal - สไตล์ใหม่
+  $swal.fire({
+    title: '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>กำลังสร้างรายงาน...</div>',
+    html: `
+      <div class="mt-4">
+        <div class="bg-blue-50 rounded-lg p-4 mb-4">
+          <p class="text-blue-800 font-medium">📊 กำลังประมวลผลข้อมูล</p>
+          <p class="text-blue-600 text-sm mt-1">ระบบกำลังจัดทำไฟล์ PDF สำหรับ <strong>${userData.name}</strong></p>
+        </div>
+        <div class="flex justify-center">
+          <div class="animate-pulse flex space-x-1">
+            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    `,
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    customClass: {
+      popup: 'rounded-2xl shadow-2xl',
+      title: 'text-lg'
+    }
+  });
+
+  try {
+    const blob = await downloadReportPdf(recordId, reportBody);
+
+    if (blob) {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `lung-function-report-${userData.name}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      // Success modal - สไตล์ใหม่
+      $swal.fire({
+        icon: 'success',
+        title: '<strong>🎉 ดาวน์โหลดสำเร็จ!</strong>',
+        html: `
+          <div class="mt-4 bg-green-50 rounded-lg p-4">
+            <p class="text-green-800">รายงานสำหรับ <strong>${userData.name}</strong> พร้อมใช้งานแล้ว</p>
+            <p class="text-green-600 text-sm mt-2">📄 ไฟล์ได้รับการบันทึกในโฟลเดอร์ดาวน์โหลดของคุณ</p>
+          </div>
+        `,
+        confirmButtonText: 'เรียบร้อย',
+        confirmButtonColor: '#10b981',
+        customClass: {
+          popup: 'rounded-2xl shadow-2xl',
+          confirmButton: 'rounded-lg px-6 py-2 font-medium'
+        }
+      });
+
+    } else {
+      throw new Error(error.value || 'ไม่สามารถดาวน์โหลดไฟล์ PDF ได้');
+    }
+  } catch (err) {
+    console.error("Download error:", err);
+    
+    // Error modal - สไตล์ใหม่
     $swal.fire({
       icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: error.value || 'ไม่สามารถดาวน์โหลดไฟล์ PDF ได้'
+      title: '<strong>⚠️ เกิดข้อผิดพลาด</strong>',
+      html: `
+        <div class="mt-4 bg-red-50 rounded-lg p-4">
+          <p class="text-red-800 font-medium">ไม่สามารถสร้างรายงานได้</p>
+          <p class="text-red-600 text-sm mt-2">กรุณาลองใหม่อีกครั้ง หรือติดต่อฝ่ายสนับสนุน</p>
+          <div class="mt-3 text-xs text-red-500 font-mono bg-red-100 p-2 rounded">
+            Error: ${err.message || 'Unknown error'}
+          </div>
+        </div>
+      `,
+      confirmButtonText: 'ลองใหม่',
+      showCancelButton: true,
+      cancelButtonText: 'ปิด',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      customClass: {
+        popup: 'rounded-2xl shadow-2xl',
+        confirmButton: 'rounded-lg px-6 py-2 font-medium',
+        cancelButton: 'rounded-lg px-6 py-2 font-medium'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleDownloadPdf(); // เรียกใช้ฟังก์ชันซ้ำ
+      }
     });
   }
 };
-
 
 
 onMounted(async () => {

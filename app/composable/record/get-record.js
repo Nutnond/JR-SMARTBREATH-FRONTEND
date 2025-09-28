@@ -11,6 +11,8 @@ export const useRecordApi = () => {
     const error = ref(null);
 
     // --- Configuration ---
+    // ต้องแน่ใจว่าได้ใช้ useNuxtApp() หรือ useRuntimeConfig() ตามบริบทของ Nuxt 
+    // หากใช้ Nuxt 3, useRuntimeConfig() เป็นวิธีที่ถูกต้อง
     const config = useRuntimeConfig();
     const API_URL = config.public.BASE_API_URL || 'http://localhost:8080';
 
@@ -77,7 +79,7 @@ export const useRecordApi = () => {
         }
     };
 
-    // --- ✅ UPDATED: Function to delete a record ---
+    // --- Function to delete a record ---
     const deleteRecord = async (recordId) => {
         loading.value = true;
         error.value = null;
@@ -117,9 +119,11 @@ export const useRecordApi = () => {
     /**
      * 📥 ดาวน์โหลดรายงานผลการทดสอบในรูปแบบ PDF
      * @param {string} recordId - ID ของผลการทดสอบ
+     * @param {object} body - ข้อมูลผู้รับรายงาน (patientInfo: {name, age, gender, height, weight}, isCurrentUser)
      * @returns {Promise<Blob|null>} - คืนค่าเป็น Blob object ถ้าสำเร็จ, หรือ null ถ้าล้มเหลว
      */
-    const downloadReportPdf = async (recordId) => {
+    // 🎯 ปรับปรุง: เพิ่ม body เป็น parameter และใช้ใน fetch call
+    const downloadReportPdf = async (recordId, body) => {
         if (!recordId) {
             error.value = 'จำเป็นต้องระบุ ID ของผลการทดสอบ';
             return null;
@@ -141,10 +145,16 @@ export const useRecordApi = () => {
 
         try {
             const blob = await $fetch(`${API_URL}/records/report/${recordId}`, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` },
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    // ระบุ Content-Type เป็น application/json สำหรับ body
+                    'Content-Type': 'application/json'
+                },
+                // 🎯 ปรับปรุง: ส่ง body ข้อมูลผู้รับรายงานไปยัง API
+                body: body,
                 // สำคัญ: กำหนด responseType เป็น 'blob' เพื่อรับไฟล์
-                responseType: 'blob' 
+                responseType: 'blob'
             });
             return blob;
         } catch (err) {
@@ -166,6 +176,6 @@ export const useRecordApi = () => {
         fetchRecords,
         fetchRecordById,
         deleteRecord,
-        downloadReportPdf
+        downloadReportPdf // ส่งออกฟังก์ชันที่ปรับปรุงแล้ว
     };
 };
