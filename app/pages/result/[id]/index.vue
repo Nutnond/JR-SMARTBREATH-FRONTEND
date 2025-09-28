@@ -426,7 +426,7 @@ const handleDownloadPdf = async () => {
   const recordId = route.params.id;
   if (!recordId) return;
 
-  // 1. แสดง Modal ให้เลือกผู้รับรายงาน - สไตล์ใหม่
+  // 1. แสดง Modal ให้เลือกผู้รับรายงาน
   const { value: recipientType } = await $swal.fire({
     title: '<strong>📋 รายงานนี้สำหรับใคร?</strong>',
     html: `
@@ -469,11 +469,9 @@ const handleDownloadPdf = async () => {
       cancelButton: 'rounded-lg px-6 py-2 font-medium'
     },
     didOpen: () => {
-      // เพิ่ม event listeners สำหรับ custom radio buttons
       const radioInputs = document.querySelectorAll('input[name="recipient"]');
       const radioVisuals = document.querySelectorAll('.w-3.h-3');
       
-      // ตั้งค่าเริ่มต้น
       radioInputs[0].checked = true;
       radioVisuals[0].classList.remove('opacity-0');
       
@@ -488,11 +486,7 @@ const handleDownloadPdf = async () => {
     },
     preConfirm: () => {
       const selectedRadio = document.querySelector('input[name="recipient"]:checked');
-      if (!selectedRadio) {
-        $swal.showValidationMessage('กรุณาเลือกผู้รับรายงาน');
-        return false;
-      }
-      return selectedRadio.value;
+      return selectedRadio ? selectedRadio.value : null;
     }
   });
 
@@ -505,254 +499,177 @@ const handleDownloadPdf = async () => {
   if (isCurrentUser) {
     userData = CurrentUser;
   } else {
-    // 2. Modal สำหรับกรอกข้อมูลบุคคลอื่น - ปรับปรุงใหม่
-    const { value: formValues } = await $swal.fire({
-      title: '<strong>📝 กรอกข้อมูลผู้รับรายงาน</strong>',
-      html: `
-        <div class="mt-6 space-y-5">
-          <!-- ชื่อ -->
-          <div class="text-left">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="fas fa-user mr-2"></i>ชื่อ-นามสกุล
-            </label>
-            <input 
-              id="patient-name" 
-              type="text" 
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
-              placeholder="กรอกชื่อ-นามสกุล"
-              maxlength="100"
-            >
-            <div class="text-xs text-red-500 mt-1 hidden" id="name-error">กรุณากรอกชื่อ-นามสกุล</div>
-          </div>
-
-          <!-- อายุ -->
-          <div class="text-left">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="fas fa-birthday-cake mr-2"></i>อายุ (ปี)
-            </label>
-            <input 
-              id="patient-age" 
-              type="number" 
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
-              placeholder="กรอกอายุ"
-              min="1" 
-              max="150"
-            >
-            <div class="text-xs text-red-500 mt-1 hidden" id="age-error">อายุต้องอยู่ระหว่าง 1-150 ปี</div>
-          </div>
-
-          <!-- เพศ -->
-          <div class="text-left">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="fas fa-venus-mars mr-2"></i>เพศ
-            </label>
-            <select 
-              id="patient-gender" 
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
-            >
-              <option value="">เลือกเพศ</option>
-              <option value="ชาย">👨 ชาย</option>
-              <option value="หญิง">👩 หญิง</option>
-            </select>
-            <div class="text-xs text-red-500 mt-1 hidden" id="gender-error">กรุณาเลือกเพศ</div>
-          </div>
-
-          <!-- ส่วนสูงและน้ำหนัก -->
-          <div class="grid grid-cols-2 gap-4">
+    // 2. Modal สำหรับกรอกข้อมูลบุคคลอื่น - ใช้ validation แบบง่าย
+    while (true) {
+      const { value: formValues, isConfirmed } = await $swal.fire({
+        title: '<strong>📝 กรอกข้อมูลผู้รับรายงาน</strong>',
+        html: `
+          <div class="mt-6 space-y-5">
+            <!-- ชื่อ -->
             <div class="text-left">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
-                <i class="fas fa-ruler-vertical mr-2"></i>ส่วนสูง (ซม.)
+                <i class="fas fa-user mr-2"></i>ชื่อ-นามสกุล <span class="text-red-500">*</span>
               </label>
               <input 
-                id="patient-height" 
-                type="number" 
+                id="patient-name" 
+                type="text" 
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
-                placeholder="เช่น 165"
-                min="50" 
-                max="250"
+                placeholder="กรอกชื่อ-นามสกุล"
+                maxlength="100"
               >
-              <div class="text-xs text-red-500 mt-1 hidden" id="height-error">ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.</div>
             </div>
-            
+
+            <!-- อายุ -->
             <div class="text-left">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
-                <i class="fas fa-weight mr-2"></i>น้ำหนัก (กก.)
+                <i class="fas fa-birthday-cake mr-2"></i>อายุ (ปี) <span class="text-red-500">*</span>
               </label>
               <input 
-                id="patient-weight" 
+                id="patient-age" 
                 type="number" 
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
-                placeholder="เช่น 60"
-                min="10" 
-                max="300"
+                placeholder="กรอกอายุ"
+                min="1" 
+                max="150"
               >
-              <div class="text-xs text-red-500 mt-1 hidden" id="weight-error">น้ำหนักต้องอยู่ระหว่าง 10-300 กก.</div>
+            </div>
+
+            <!-- เพศ -->
+            <div class="text-left">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-venus-mars mr-2"></i>เพศ <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="patient-gender" 
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
+              >
+                <option value="">เลือกเพศ</option>
+                <option value="ชาย">👨 ชาย</option>
+                <option value="หญิง">👩 หญิง</option>
+              </select>
+            </div>
+
+            <!-- ส่วนสูงและน้ำหนัก -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="text-left">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-ruler-vertical mr-2"></i>ส่วนสูง (ซม.) <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  id="patient-height" 
+                  type="number" 
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
+                  placeholder="เช่น 165"
+                  min="50" 
+                  max="250"
+                >
+              </div>
+              
+              <div class="text-left">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-weight mr-2"></i>น้ำหนัก (กก.) <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  id="patient-weight" 
+                  type="number" 
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200" 
+                  placeholder="เช่น 60"
+                  min="10" 
+                  max="300"
+                >
+              </div>
             </div>
           </div>
-        </div>
-      `,
-      width: '600px',
-      focusConfirm: false,
-      confirmButtonText: 'สร้างรายงาน',
-      cancelButtonText: 'ย้อนกลับ',
-      confirmButtonColor: '#10b981',
-      cancelButtonColor: '#6b7280',
-      customClass: {
-        popup: 'rounded-2xl shadow-2xl',
-        title: 'text-xl',
-        htmlContainer: 'text-left',
-        confirmButton: 'rounded-lg px-6 py-2 font-medium',
-        cancelButton: 'rounded-lg px-6 py-2 font-medium'
-      },
-      didOpen: () => {
-        // เพิ่ม Font Awesome สำหรับไอคอน
-        if (!document.querySelector('link[href*="font-awesome"]')) {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-          document.head.appendChild(link);
+        `,
+        width: '600px',
+        focusConfirm: false,
+        confirmButtonText: 'สร้างรายงาน',
+        cancelButtonText: 'ย้อนกลับ',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        customClass: {
+          popup: 'rounded-2xl shadow-2xl',
+          title: 'text-xl',
+          htmlContainer: 'text-left',
+          confirmButton: 'rounded-lg px-6 py-2 font-medium',
+          cancelButton: 'rounded-lg px-6 py-2 font-medium'
+        },
+        didOpen: () => {
+          // เพิ่ม Font Awesome
+          if (!document.querySelector('link[href*="font-awesome"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+            document.head.appendChild(link);
+          }
+        },
+        preConfirm: () => {
+          const name = document.getElementById('patient-name').value.trim();
+          const age = parseInt(document.getElementById('patient-age').value);
+          const gender = document.getElementById('patient-gender').value;
+          const height = parseInt(document.getElementById('patient-height').value);
+          const weight = parseInt(document.getElementById('patient-weight').value);
+
+          return { name, age, gender, height, weight };
         }
+      });
 
-        // เพิ่ม real-time validation
-        const inputs = ['name', 'age', 'gender', 'height', 'weight'];
-        inputs.forEach(inputName => {
-          const element = document.getElementById(`patient-${inputName}`);
-          if (element) {
-            element.addEventListener('input', () => validateField(inputName));
-            element.addEventListener('blur', () => validateField(inputName));
+      if (!isConfirmed) return;
+
+      // Validate ข้อมูล
+      const { name, age, gender, height, weight } = formValues;
+      let errors = [];
+
+      if (!name || name.length < 2) {
+        errors.push('• กรุณากรอกชื่อ-นามสกุล (อย่างน้อย 2 ตัวอักษร)');
+      }
+      if (!age || age < 1 || age > 150) {
+        errors.push('• อายุต้องอยู่ระหว่าง 1-150 ปี');
+      }
+      if (!gender) {
+        errors.push('• กรุณาเลือกเพศ');
+      }
+      if (!height || height < 50 || height > 250) {
+        errors.push('• ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.');
+      }
+      if (!weight || weight < 10 || weight > 300) {
+        errors.push('• น้ำหนักต้องอยู่ระหว่าง 10-300 กก.');
+      }
+
+      // ตรวจสอบ BMI
+      if (height && weight) {
+        const bmi = weight / Math.pow(height / 100, 2);
+        if (bmi < 10 || bmi > 60) {
+          errors.push('• ค่า BMI ผิดปกติ กรุณาตรวจสอบส่วนสูงและน้ำหนักอีกครั้ง');
+        }
+      }
+
+      if (errors.length > 0) {
+        await $swal.fire({
+          icon: 'error',
+          title: '⚠️ ข้อมูลไม่ถูกต้อง',
+          html: `
+            <div class="text-left mt-4">
+              <p class="text-gray-700 mb-3">กรุณาแก้ไขข้อมูลต่อไปนี้:</p>
+              <div class="bg-red-50 rounded-lg p-3">
+                <div class="text-red-700 text-sm">
+                  ${errors.join('<br>')}
+                </div>
+              </div>
+            </div>
+          `,
+          confirmButtonText: '🔄 แก้ไข',
+          confirmButtonColor: '#ef4444',
+          customClass: {
+            popup: 'rounded-2xl shadow-2xl',
+            confirmButton: 'rounded-lg px-6 py-2 font-medium'
           }
         });
-      },
-      preConfirm: () => {
-        const name = document.getElementById('patient-name').value.trim();
-        const age = parseInt(document.getElementById('patient-age').value);
-        const gender = document.getElementById('patient-gender').value;
-        const height = parseInt(document.getElementById('patient-height').value);
-        const weight = parseInt(document.getElementById('patient-weight').value);
-
-        let isValid = true;
-        
-        // Validate ชื่อ
-        if (!name || name.length < 2) {
-          showFieldError('name', 'กรุณากรอกชื่อ-นามสกุล (อย่างน้อย 2 ตัวอักษร)');
-          isValid = false;
-        }
-
-        // Validate อายุ
-        if (!age || age < 1 || age > 150) {
-          showFieldError('age', 'อายุต้องอยู่ระหว่าง 1-150 ปี');
-          isValid = false;
-        }
-
-        // Validate เพศ
-        if (!gender) {
-          showFieldError('gender', 'กรุณาเลือกเพศ');
-          isValid = false;
-        }
-
-        // Validate ส่วนสูง
-        if (!height || height < 50 || height > 250) {
-          showFieldError('height', 'ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.');
-          isValid = false;
-        }
-
-        // Validate น้ำหนัก
-        if (!weight || weight < 10 || weight > 300) {
-          showFieldError('weight', 'น้ำหนักต้องอยู่ระหว่าง 10-300 กก.');
-          isValid = false;
-        }
-
-        // ตรวจสอบ BMI ว่าสมเหตุสมผลหรือไม่
-        if (height && weight) {
-          const bmi = weight / Math.pow(height / 100, 2);
-          if (bmi < 10 || bmi > 60) {
-            $swal.showValidationMessage('ค่า BMI ผิดปกติ กรุณาตรวจสอบส่วนสูงและน้ำหนักอีกครั้ง');
-            isValid = false;
-          }
-        }
-
-        if (!isValid) {
-          return false;
-        }
-
-        return { name, age, gender, height, weight };
+        continue; // กลับไปให้กรอกใหม่
       }
-    });
 
-    if (!formValues) return;
-    userData = formValues;
-  }
-
-  // Helper functions สำหรับ validation
-  function validateField(fieldName) {
-    const element = document.getElementById(`patient-${fieldName}`);
-    const errorElement = document.getElementById(`${fieldName}-error`);
-    
-    if (!element || !errorElement) return;
-
-    let isValid = true;
-    let errorMessage = '';
-
-    switch (fieldName) {
-      case 'name':
-        const name = element.value.trim();
-        if (!name || name.length < 2) {
-          isValid = false;
-          errorMessage = 'กรุณากรอกชื่อ-นามสกุล (อย่างน้อย 2 ตัวอักษร)';
-        }
-        break;
-      case 'age':
-        const age = parseInt(element.value);
-        if (!age || age < 1 || age > 150) {
-          isValid = false;
-          errorMessage = 'อายุต้องอยู่ระหว่าง 1-150 ปี';
-        }
-        break;
-      case 'gender':
-        if (!element.value) {
-          isValid = false;
-          errorMessage = 'กรุณาเลือกเพศ';
-        }
-        break;
-      case 'height':
-        const height = parseInt(element.value);
-        if (!height || height < 50 || height > 250) {
-          isValid = false;
-          errorMessage = 'ส่วนสูงต้องอยู่ระหว่าง 50-250 ซม.';
-        }
-        break;
-      case 'weight':
-        const weight = parseInt(element.value);
-        if (!weight || weight < 10 || weight > 300) {
-          isValid = false;
-          errorMessage = 'น้ำหนักต้องอยู่ระหว่าง 10-300 กก.';
-        }
-        break;
-    }
-
-    if (isValid) {
-      element.classList.remove('border-red-500');
-      element.classList.add('border-green-500');
-      errorElement.classList.add('hidden');
-    } else {
-      element.classList.remove('border-green-500');
-      element.classList.add('border-red-500');
-      errorElement.textContent = errorMessage;
-      errorElement.classList.remove('hidden');
-    }
-
-    return isValid;
-  }
-
-  function showFieldError(fieldName, message) {
-    const element = document.getElementById(`patient-${fieldName}`);
-    const errorElement = document.getElementById(`${fieldName}-error`);
-    
-    if (element && errorElement) {
-      element.classList.add('border-red-500');
-      element.classList.remove('border-green-500');
-      errorElement.textContent = message;
-      errorElement.classList.remove('hidden');
+      userData = formValues;
+      break; // ข้อมูลถูกต้อง ออกจาก loop
     }
   }
 
@@ -768,7 +685,7 @@ const handleDownloadPdf = async () => {
     isCurrentUser: isCurrentUser
   };
 
-  // 4. แสดง loading modal - สไตล์ใหม่
+  // 4. แสดง loading modal
   $swal.fire({
     title: '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>กำลังสร้างรายงาน...</div>',
     html: `
@@ -807,7 +724,7 @@ const handleDownloadPdf = async () => {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      // Success modal - สไตล์ใหม่
+      // Success modal
       $swal.fire({
         icon: 'success',
         title: '<strong>🎉 ดาวน์โหลดสำเร็จ!</strong>',
@@ -831,7 +748,7 @@ const handleDownloadPdf = async () => {
   } catch (err) {
     console.error("Download error:", err);
     
-    // Error modal - สไตล์ใหม่
+    // Error modal
     $swal.fire({
       icon: 'error',
       title: '<strong>⚠️ เกิดข้อผิดพลาด</strong>',
@@ -856,12 +773,11 @@ const handleDownloadPdf = async () => {
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        handleDownloadPdf(); // เรียกใช้ฟังก์ชันซ้ำ
+        handleDownloadPdf();
       }
     });
   }
 };
-
 
 onMounted(async () => {
   const recordId = route.params.id;
